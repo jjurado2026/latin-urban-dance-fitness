@@ -1,97 +1,97 @@
 /* =====================================================================
-   LATIN URBAN DANCE & FITNESS — global.css · Dirección "Neón"
-   Su logo es un rótulo de neón: contorno turquesa, sombra dura azul
-   desplazada y relleno en degradado naranja→magenta. Está diseñado sobre
-   negro y su web lo pone sobre blanco. Aquí la página es la sala donde ese
-   neón está encendido: fondo oscuro, contornos turquesa, sombras duras y
-   el degradado caliente reservado para lo que importa.
-   Todos los colores están medidos píxel a píxel sobre su propio logo.
+   LATIN URBAN DANCE & FITNESS — global.css · Dirección "Compás"
+   El baile latino se cuenta en ochos. La página se maqueta sobre una
+   retícula de 8 tiempos, porque el método que enseña Junior Monzón
+   combina "baile, fitness y entrenamiento mental EN BLOQUES".
+   La estructura de la página es la estructura musical del producto.
+
+   Color medido píxel a píxel sobre su logo.
+   Regla verificada: turquesa sobre negro 15,7:1 → vale como texto.
+   Azul #304FFF 3,46:1 → PROHIBIDO como texto, solo sombra dura o luz.
    ===================================================================== */
 
-/* ---------- Fuentes autoalojadas (subconjunto latino) ---------- */
+/* ---------- Fuentes variables autoalojadas ----------
+   Autoalojadas por obligación técnica, no por gusto: servidas desde el CDN
+   de Google, el eje wdth no responde mientras la fuente carga, y el encaje
+   a sangre del hero depende de ese eje. */
 @font-face{
-  font-family:'Anton';
-  src:url('../fonts/anton.woff2') format('woff2');
-  font-weight:400;
-  font-style:normal;
-  font-display:swap;
+  font-family:'Anybody';
+  src:url('../fonts/anybody.woff2') format('woff2');
+  font-weight:100 900;
+  font-stretch:50% 150%;
+  font-display:block;          /* block, no swap: el hero se compone con métricas exactas */
 }
 @font-face{
-  font-family:'Outfit';
-  src:url('../fonts/outfit.woff2') format('woff2');
-  font-weight:300 800;
-  font-style:normal;
+  font-family:'Archivo';
+  src:url('../fonts/archivo.woff2') format('woff2');
+  font-weight:100 900;
+  font-stretch:62% 125%;
   font-display:swap;
 }
 
-/* ---------- Tokens ---------- */
 :root{
   /* Los suyos — medidos sobre el logo */
-  --turquesa:#64FEDA;        /* contorno de las letras */
-  --azul:#304FFF;            /* sombra dura desplazada */
-  --naranja:#FF9620;         /* relleno, arriba */
-  --coral:#FF5E5C;           /* relleno, medio */
-  --magenta:#FF17A9;         /* relleno, abajo */
+  --turquesa:#64FEDA;
+  --azul:#304FFF;            /* solo sombra/luz, nunca texto */
+  --naranja:#FF9620;
+  --coral:#FF5E5C;
+  --magenta:#FF17A9;
+  --oro:#D8B171;             /* el dorado del rótulo físico de su pared */
 
   /* Sala */
-  --negro:#080808;
-  --negro-2:#131316;         /* superficie elevada */
-  --negro-3:#1C1C21;         /* superficie flotante */
-  --linea:#2A2A31;
-  --linea-viva:rgba(100,254,218,.28);
+  --negro:#0B0B0F;
+  --negro-2:#131318;
+  --negro-3:#1B1B22;
+  --linea:#27272F;
+  --linea-viva:rgba(100,254,218,.26);
 
   /* Texto */
   --blanco:#FFFFFF;
-  --texto:#E7E8EE;
-  --texto-suave:#B9BBC6;     /* ~9:1 sobre --negro */
-  --texto-tenue:#8A8C99;     /* ~5,3:1 — solo textos de apoyo */
+  --texto:#E9EAF0;
+  --texto-suave:#B7B9C6;
+  --texto-tenue:#8B8D9B;
 
-  /* El degradado del logo, como objeto reutilizable */
-  --fuego:linear-gradient(170deg,var(--naranja) 0%,var(--coral) 48%,var(--magenta) 100%);
+  --fuego:linear-gradient(168deg,var(--naranja) 0%,var(--coral) 48%,var(--magenta) 100%);
   --fuego-h:linear-gradient(100deg,var(--naranja) 0%,var(--coral) 50%,var(--magenta) 100%);
 
-  /* Sistema de capas: sombras tintadas con el azul del logo */
-  --sombra-1:0 2px 4px rgba(0,0,0,.4), 0 12px 28px -14px rgba(48,79,255,.45);
-  --sombra-2:0 4px 10px rgba(0,0,0,.5), 0 32px 68px -26px rgba(48,79,255,.55);
-  --glow-turquesa:0 0 0 1px rgba(100,254,218,.5), 0 0 24px -4px rgba(100,254,218,.45);
-  --glow-magenta:0 0 28px -6px rgba(255,23,169,.6);
-
-  --display:'Anton',Impact,'Haettenschweiler','Arial Narrow',sans-serif;
-  --cuerpo:'Outfit',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --display:'Anybody','Arial Narrow',Impact,sans-serif;
+  --cuerpo:'Archivo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
 
   --ease:cubic-bezier(.16,1,.3,1);
-  --muelle:cubic-bezier(.34,1.56,.64,1);
+  --muelle:cubic-bezier(.34,1.4,.64,1);
   --t-press:110ms;
   --t-corto:200ms;
   --t-medio:460ms;
   --t-largo:820ms;
+  --tiempo:90ms;             /* la unidad rítmica: un tiempo del compás */
 
-  --env:1200px;
-  --margen:clamp(20px,4.5vw,64px);
-  --sec:clamp(72px,9vw,128px);
-  --cab-alto:76px;
-  --r-tarjeta:16px;
-  --r-campo:10px;
-  --r-pill:999px;
+  --env:1280px;
+  --margen:clamp(18px,4.5vw,56px);
+  --sec:clamp(76px,9vw,140px);
+  --cab-alto:72px;
+
+  /* La retícula de 8 tiempos */
+  --tiempos:8;
 }
-@media (max-width:899px){ :root{--cab-alto:62px} }
+@media (max-width:899px){
+  :root{--cab-alto:58px; --tiempos:6}
+}
 
 /* ---------- Base ---------- */
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 html:focus-within{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){ html:focus-within{scroll-behavior:auto} }
+@media (prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}}
 
 body{
   margin:0;
   background:var(--negro);
   color:var(--texto);
   font-family:var(--cuerpo);
-  font-size:clamp(16px,.4vw + 15px,18px);
+  font-size:clamp(16px,.38vw + 15px,18px);
   font-weight:400;
   line-height:1.7;
   -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
   overflow-x:hidden;
 }
 
@@ -99,187 +99,179 @@ img,picture,svg,video{display:block;max-width:100%}
 img{height:auto;border:0}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:inherit}
-
-h1,h2,h3,h4{margin:0;font-weight:400;line-height:1.02;letter-spacing:.005em}
+h1,h2,h3,h4{margin:0;font-weight:400;line-height:1}
 p{margin:0}
 ul,ol{margin:0;padding:0;list-style:none}
+table{border-collapse:collapse}
 
-/* Tipografía de display: Anton solo tiene un peso, se trabaja con tamaño */
-.display{
-  font-family:var(--display);
-  text-transform:uppercase;
-  line-height:.94;
-  letter-spacing:.01em;
-}
-
-/* ---------- Foco visible: el turquesa del logo ---------- */
+/* ---------- Foco ---------- */
 :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
   outline:3px solid var(--turquesa);
   outline-offset:3px;
-  border-radius:4px;
+  border-radius:3px;
 }
 
-/* ---------- Saltar al contenido ---------- */
 .salta{
   position:absolute;left:50%;top:0;transform:translate(-50%,-140%);
   z-index:200;padding:12px 22px;
   background:var(--turquesa);color:#04241C;
-  font-weight:700;text-decoration:none;border-radius:0 0 12px 12px;
+  font-weight:700;text-decoration:none;
   transition:transform var(--t-corto) var(--ease);
 }
 .salta:focus-visible{transform:translate(-50%,0)}
 
-/* ---------- Envoltorio ---------- */
-.env{width:100%;max-width:var(--env);margin-inline:auto;padding-inline:var(--margen)}
+.vo{
+  position:absolute!important;width:1px;height:1px;
+  padding:0;margin:-1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0;
+}
+
+/* ---------- Envoltorio y retícula ---------- */
+.env{
+  width:100%;max-width:var(--env);
+  margin-inline:auto;padding-inline:var(--margen);
+}
 .seccion{padding-block:var(--sec)}
 .seccion--elevada{background:var(--negro-2)}
 
 /* =====================================================================
-   LA FIRMA · El tratamiento de rótulo
-   Su logo, convertido en sistema tipográfico: relleno del degradado
-   caliente, contorno turquesa y sombra dura azul desplazada.
-   Se usa con restricción: titulares de sección y el precio destacado.
+   LA FIRMA · La regla de 8 tiempos
+   No es adorno: es la retícula sobre la que se alinean las secciones.
+   El acento cae en los tiempos 1 y 5, como en un compás de baile latino.
    ===================================================================== */
-/* Construcción en dos capas, como el logo real:
-   · el pseudo-elemento ::before va DETRÁS y lleva el contorno turquesa
-     y la sombra dura azul;
-   · el elemento lleva el relleno del degradado, limpio y sin sombra.
-   Así el degradado nunca queda cubierto por la sombra, que es lo que pasa
-   si se resuelve todo con text-shadow sobre una tipografía tan condensada. */
-.rotulo{
-  font-family:var(--display);
-  text-transform:uppercase;
-  line-height:.94;
-  position:relative;
-  display:inline-block;
-  color:var(--naranja);                       /* respaldo si no hay recorte */
+.compas{
+  display:grid;
+  grid-template-columns:repeat(var(--tiempos),1fr);
+  border-top:1px solid var(--linea);
+  list-style:none;
 }
-/* El eco va detrás: sin isolation en el padre, z-index negativo lo coloca
-   bajo el texto del elemento pero sobre el fondo de la sección.
-   `inset:0` sobre un padre inline-block lo ajusta a la caja del texto, así
-   que el rótulo conserva su alto normal y no se solapa con lo de al lado. */
-.rotulo__eco{
-  position:absolute;inset:0;
-  z-index:-1;
-  color:var(--azul);
-  -webkit-text-stroke:var(--rot-trazo,2px) var(--turquesa);
-  paint-order:stroke fill;
-  text-shadow:var(--rot-desp,4px) var(--rot-desp,4px) 0 var(--azul);
-  pointer-events:none;
-  user-select:none;
+.compas li{
+  padding:7px 0 9px;
+  border-left:1px solid var(--linea);
+  font-family:var(--cuerpo);
+  font-size:.66rem;font-weight:600;
+  letter-spacing:.2em;
+  color:var(--texto-tenue);
+  text-align:center;
 }
-/* Sin JS no hay eco: se deja el degradado limpio. Ni text-stroke ni
-   text-shadow, porque en una condensada como Anton ambos invaden los
-   contratrazos y el relleno deja de leerse. */
-/* El relleno degradado solo donde el navegador sabe recortar el fondo al texto */
-@supports ((-webkit-background-clip:text) or (background-clip:text)){
-  .rotulo{
-    background:var(--fuego);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    -webkit-text-fill-color:transparent;
-  }
-}
-/* Variante fría: para cuando el degradado caliente ya está en uso cerca */
-.rotulo--frio{
-  background:none;
-  -webkit-text-fill-color:var(--turquesa);
+.compas li:first-child{border-left:0}
+/* El acento: tiempos 1 y 5 */
+.compas li[data-acento]{
   color:var(--turquesa);
+  border-left-color:var(--linea-viva);
 }
-.rotulo--frio::before{-webkit-text-stroke:0}
+.compas li[data-acento]:first-child{border-left:0}
 
-/* Eyebrow: etiqueta de sección. `flex` (no inline-flex) para que ocupe su
-   propia línea: el rótulo que le sigue es inline-block y, si no, compartirían
-   línea y se solaparían. */
+/* ---------- Etiqueta de sección ---------- */
 .eyebrow{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:11px;
   width:fit-content;
-  font-size:.75rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;
   color:var(--turquesa);
 }
 .eyebrow::before{
-  content:"";width:26px;height:2px;background:var(--turquesa);
-  box-shadow:0 0 12px rgba(100,254,218,.8);
+  content:"";width:22px;height:2px;
+  background:var(--turquesa);
+  box-shadow:0 0 12px rgba(100,254,218,.85);
+}
+
+/* ---------- Titulares de sección ---------- */
+.titular{
+  display:block;
+  font-family:var(--display);
+  font-weight:800;
+  font-stretch:112%;
+  text-transform:uppercase;
+  line-height:.92;
+  letter-spacing:-.005em;
+  font-size:clamp(2.1rem,5.6vw,4rem);
+  color:var(--blanco);
+}
+.titular em{
+  font-style:normal;
+  background:var(--fuego-h);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;
+}
+.titular b{
+  font-weight:800;
+  color:transparent;
+  -webkit-text-stroke:1.6px var(--turquesa);
 }
 
 /* ---------- Botones ---------- */
 .btn{
-  --desp:4px;
   position:relative;
   display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  padding:15px 28px;
-  font-family:var(--cuerpo);font-size:1rem;font-weight:700;
-  letter-spacing:.02em;text-decoration:none;text-align:center;
-  border:0;border-radius:var(--r-pill);cursor:pointer;
+  padding:16px 28px;
+  font-family:var(--cuerpo);
+  font-size:1rem;font-weight:700;letter-spacing:.01em;
+  text-decoration:none;text-align:center;
+  border:0;cursor:pointer;
   transition:transform var(--t-corto) var(--muelle),
              box-shadow var(--t-corto) var(--ease),
              background-color var(--t-corto) var(--ease),
              color var(--t-corto) var(--ease);
 }
-/* Principal: el degradado del logo + sombra dura azul que se "pulsa" */
+/* Principal: el degradado del logo con su sombra dura azul */
 .btn--fuego{
   background:var(--fuego-h);
-  color:#180206;
-  box-shadow:var(--desp) var(--desp) 0 var(--azul), var(--glow-magenta);
+  color:#16020A;
+  box-shadow:5px 5px 0 var(--azul);
 }
 .btn--fuego:hover{
   transform:translate(-2px,-2px);
-  box-shadow:6px 6px 0 var(--azul), 0 0 34px -4px rgba(255,23,169,.75);
+  box-shadow:7px 7px 0 var(--azul);
 }
 .btn--fuego:active{
-  transform:translate(var(--desp),var(--desp));
-  box-shadow:0 0 0 var(--azul), var(--glow-magenta);
+  transform:translate(5px,5px);
+  box-shadow:0 0 0 var(--azul);
   transition-duration:var(--t-press);
 }
-/* Secundario: contorno turquesa */
 .btn--linea{
   background:transparent;color:var(--turquesa);
   box-shadow:inset 0 0 0 2px var(--turquesa);
 }
 .btn--linea:hover{
   transform:translateY(-2px);
-  background:rgba(100,254,218,.1);
-  box-shadow:inset 0 0 0 2px var(--turquesa), 0 0 22px -4px rgba(100,254,218,.6);
+  background:rgba(100,254,218,.09);
 }
 .btn--linea:active{transform:translateY(0);transition-duration:var(--t-press)}
-/* Terciario: sólido claro */
-.btn--claro{background:var(--blanco);color:#0B0B0E}
-.btn--claro:hover{transform:translateY(-2px);box-shadow:var(--sombra-1)}
-.btn--claro:active{transform:translateY(0);transition-duration:var(--t-press)}
+
+/* Terciario: texto subrayado, al estilo del CTA secundario de Boiler Room */
+.btn--texto{
+  padding:14px 2px;
+  background:none;color:var(--texto);
+  font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  font-size:.86rem;
+  border-bottom:2px solid var(--linea-viva);
+}
+.btn--texto:hover{color:var(--turquesa);border-bottom-color:var(--turquesa)}
 
 .btn--ancho{width:100%}
-.btn--pequeno{padding:11px 20px;font-size:.9rem}
+.btn--peq{padding:11px 18px;font-size:.88rem}
 
-/* ---------- Enlaces de texto ---------- */
 .enlace{
   color:var(--turquesa);text-decoration:none;
   background-image:linear-gradient(var(--turquesa),var(--turquesa));
-  background-size:0 2px;background-repeat:no-repeat;background-position:0 100%;
+  background-size:0 1.5px;background-repeat:no-repeat;background-position:0 100%;
   transition:background-size var(--t-corto) var(--ease);
 }
-.enlace:hover{background-size:100% 2px}
+.enlace:hover{background-size:100% 1.5px}
 
-/* ---------- Accesibilidad ---------- */
-.vo{
-  position:absolute!important;width:1px;height:1px;
-  padding:0;margin:-1px;overflow:hidden;
-  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
-}
-
-/* ---------- Aparición al hacer scroll ---------- */
-.js .aparece{
-  opacity:0;
-  transform:translateY(24px);
-}
-.js .aparece.visible{
+/* ---------- Entrada por scroll ----------
+   Nativa con animation-timeline: view() donde existe; con JS donde no.
+   Cada sección define su propio ritmo; no hay un único fade-up global. */
+.js .entra{opacity:0}
+.js .entra.visible{
   opacity:1;
-  transform:none;
-  transition:opacity var(--t-medio) var(--ease) calc(var(--i,0) * 80ms),
-             transform var(--t-medio) var(--muelle) calc(var(--i,0) * 80ms);
+  transition:opacity var(--t-medio) var(--ease) calc(var(--i,0) * var(--tiempo)),
+             transform var(--t-medio) var(--muelle) calc(var(--i,0) * var(--tiempo));
 }
+.js .entra--sube{transform:translateY(26px)}
+.js .entra--sube.visible{transform:none}
 
-/* ---------- Movimiento reducido y modo captura ---------- */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
     animation-duration:.001ms!important;
@@ -287,11 +279,11 @@ ul,ol{margin:0;padding:0;list-style:none}
     transition-duration:.001ms!important;
     scroll-behavior:auto!important;
   }
-  .js .aparece{opacity:1;transform:none}
+  .js .entra{opacity:1;transform:none}
 }
 .captura *,.captura *::before,.captura *::after{
   animation-duration:.001ms!important;
   animation-iteration-count:1!important;
   transition-duration:.001ms!important;
 }
-.captura .aparece{opacity:1;transform:none}
+.captura .entra{opacity:1;transform:none}
