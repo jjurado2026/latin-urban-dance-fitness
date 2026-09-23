@@ -1,8 +1,9 @@
 /* =====================================================================
-   LATIN URBAN DANCE & FITNESS — "Neón"
-   Todo el contenido es legible sin JavaScript. Esto añade: la aparición
-   al hacer scroll, el duplicado de la marquesina, su botón de pausa, el
-   menú de móvil, la cabecera compacta y la barra fija.
+   LATIN URBAN DANCE & FITNESS — "Compás"
+   Todo el contenido es legible sin JavaScript: el horario es una tabla
+   real, las clases son texto y los precios están en el HTML.
+   Esto añade: duplicado de las cintas, filtros del horario, etiquetas de
+   día en móvil, menú, cabecera compacta y barra fija.
    Parámetro ?ss → sin animaciones (para capturas).
    ===================================================================== */
 (() => {
@@ -20,65 +21,103 @@
     $$('img[loading="lazy"]').forEach(i => (i.loading = 'eager'));
   }
 
-  /* ---------- Rótulos: capa de contorno y sombra ----------
-     El degradado va en el elemento; el contorno turquesa y la sombra dura
-     azul van en una copia colocada detrás. Se hace aquí y no con
-     ::before{content:attr()} porque los titulares llevan <br>. La copia se
-     oculta a la tecnología asistiva. */
-  $$('.rotulo').forEach(el => {
-    if (el.querySelector('.rotulo__eco')) return;
-    const eco = document.createElement('span');
-    eco.className = 'rotulo__eco';
-    eco.setAttribute('aria-hidden', 'true');
-    eco.innerHTML = el.innerHTML;
-    el.insertBefore(eco, el.firstChild);
-  });
-
-  /* ---------- Aparición al entrar en pantalla ---------- */
-  const apariciones = $$('.aparece');
+  /* ---------- Entrada por scroll ---------- */
+  const entradas = $$('.entra');
   if (quieto || !('IntersectionObserver' in window)) {
-    apariciones.forEach(el => el.classList.add('visible'));
+    entradas.forEach(el => el.classList.add('visible'));
   } else {
-    const obs = new IntersectionObserver((entradas, o) => {
-      entradas.forEach(e => {
+    const obs = new IntersectionObserver((es, o) => {
+      es.forEach(e => {
         if (!e.isIntersecting) return;
         e.target.classList.add('visible');
         o.unobserve(e.target);
       });
-    }, { rootMargin: '0px 0px -12% 0px', threshold: .05 });
-    apariciones.forEach(el => obs.observe(el));
+    }, { rootMargin: '0px 0px -10% 0px', threshold: .04 });
+    entradas.forEach(el => obs.observe(el));
   }
 
-  /* ---------- Marquesina de disciplinas ----------
-     Se duplica la lista para que el bucle no tenga corte visible. La copia
-     se oculta a la tecnología asistiva: el lector de pantalla lee las 13
-     disciplinas una sola vez. */
-  const tira  = $('.tira');
-  const pista = $('#tira-pista');
-  const lista = $('#tira-lista');
-  const btnTira = $('#tira-btn');
-
-  if (pista && lista && !quieto) {
-    const copia = lista.cloneNode(true);
-    copia.removeAttribute('id');
-    copia.setAttribute('aria-hidden', 'true');
-    $$('li', copia).forEach(li => li.setAttribute('tabindex', '-1'));
-    pista.appendChild(copia);
+  /* ---------- Cintas: se duplican para que el bucle no tenga corte ----------
+     La copia se oculta a la tecnología asistiva: las disciplinas se leen
+     una sola vez. */
+  if (!quieto) {
+    ['cinta-a', 'cinta-b'].forEach(id => {
+      const lista = document.getElementById(id);
+      if (!lista) return;
+      const copia = lista.cloneNode(true);
+      copia.removeAttribute('id');
+      copia.setAttribute('aria-hidden', 'true');
+      $$('li', copia).forEach(li => li.setAttribute('tabindex', '-1'));
+      lista.parentElement.appendChild(copia);
+    });
   }
 
-  if (btnTira && tira) {
-    btnTira.addEventListener('click', () => {
-      const pausada = tira.classList.toggle('pausada');
-      btnTira.setAttribute('aria-pressed', String(pausada));
-      $('.vo', btnTira).textContent = pausada
+  const cinta = $('.cinta');
+  const btnCinta = $('#cinta-btn');
+  if (cinta && btnCinta) {
+    btnCinta.addEventListener('click', () => {
+      const pausada = cinta.classList.toggle('pausada');
+      btnCinta.setAttribute('aria-pressed', String(pausada));
+      $('.vo', btnCinta).textContent = pausada
         ? 'Reanudar el movimiento de las disciplinas'
         : 'Pausar el movimiento de las disciplinas';
     });
   }
 
+  /* ---------- Horario ---------- */
+  const tabla = $('#tabla');
+
+  if (tabla) {
+    /* En móvil la tabla se apila, así que cada clase necesita decir de qué
+       día es. Se toma del encabezado de columna, no se escribe a mano. */
+    const dias = $$('thead th', tabla).slice(1).map(th => th.textContent.trim());
+    $$('tbody tr', tabla).forEach(tr => {
+      $$('td', tr).forEach((td, i) => {
+        const cl = $('.cl', td);
+        if (cl && dias[i]) cl.setAttribute('data-dia', dias[i].slice(0, 3));
+      });
+    });
+
+    /* Filtros: ocultan clases sin recargar ni mover la retícula */
+    const filtros = $$('.filtro');
+    const clases = $$('.cl', tabla);
+
+    filtros.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.f;
+
+        filtros.forEach(b => {
+          const on = b === btn;
+          b.classList.toggle('filtro--on', on);
+          b.setAttribute('aria-pressed', String(on));
+        });
+
+        let visibles = 0;
+        clases.forEach(cl => {
+          const cats = (cl.dataset.c || '').split(/\s+/);
+          const ok = f === 'todo' || cats.includes(f);
+          cl.classList.toggle('oculta', !ok);
+          if (ok) visibles++;
+        });
+
+        // Se anuncia el resultado a quien no ve la tabla
+        let avisa = $('#filtro-estado');
+        if (!avisa) {
+          avisa = document.createElement('p');
+          avisa.id = 'filtro-estado';
+          avisa.className = 'vo';
+          avisa.setAttribute('role', 'status');
+          $('.filtros').after(avisa);
+        }
+        avisa.textContent = f === 'todo'
+          ? `Mostrando las ${visibles} clases de la semana.`
+          : `${visibles} clases coinciden con el filtro.`;
+      });
+    });
+  }
+
   /* ---------- Menú de móvil ---------- */
   const btnMenu = $('#cab-menu');
-  const nav     = $('#nav');
+  const nav = $('#nav');
 
   if (btnMenu && nav) {
     const cerrar = () => {
@@ -91,9 +130,7 @@
       btnMenu.setAttribute('aria-expanded', String(abierto));
     });
 
-    nav.addEventListener('click', e => {
-      if (e.target.closest('a')) cerrar();
-    });
+    nav.addEventListener('click', e => { if (e.target.closest('a')) cerrar(); });
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && nav.classList.contains('abierto')) {
@@ -102,37 +139,34 @@
       }
     });
 
-    matchMedia('(min-width: 1080px)').addEventListener('change', e => {
+    matchMedia('(min-width: 1024px)').addEventListener('change', e => {
       if (e.matches) cerrar();
     });
   }
 
   /* ---------- Cabecera compacta y barra fija ---------- */
-  const cab  = $('#cab');
+  const cab = $('#cab');
   const fija = $('#fija');
   const hero = $('.hero');
 
   if (cab || fija) {
-    let ticking = false;
+    let tick = false;
 
     const alScroll = () => {
       const y = scrollY;
-
-      if (cab) cab.classList.toggle('compacta', y > 12);
-
+      if (cab) cab.classList.toggle('compacta', y > 24);
       if (fija) {
-        const limite = hero ? hero.offsetHeight * .75 : 600;
+        const limite = hero ? hero.offsetHeight * .8 : 600;
         const visible = y > limite;
         fija.classList.toggle('visible', visible);
         fija.setAttribute('aria-hidden', String(!visible));
       }
-
-      ticking = false;
+      tick = false;
     };
 
     addEventListener('scroll', () => {
-      if (ticking) return;
-      ticking = true;
+      if (tick) return;
+      tick = true;
       requestAnimationFrame(alScroll);
     }, { passive: true });
 
