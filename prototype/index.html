@@ -38,12 +38,15 @@
   <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M12 5v14m-6-6 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-pausa" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-izq" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-der" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-flecha-der" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
 <header class="cab" id="cab">
   <div class="env cab__env">
     <a class="cab__logo" href="#principal" aria-label="Studio Latin Urban Dance &amp; Fitness — inicio">
-      <img src="assets/img/logo.webp" alt="Latin Urban Dance &amp; Fitness" width="1000" height="622">
+      <img src="assets/img/logo-360.png" alt="Latin Urban Dance &amp; Fitness" width="360" height="225">
     </a>
     <nav class="nav" id="nav" aria-label="Principal">
       <ul class="nav__lista">
@@ -53,10 +56,13 @@
         <li><a class="nav__enlace" href="#equipo">Equipo</a></li>
         <li><a class="nav__enlace" href="#bonos">Precios</a></li>
         <li><a class="nav__enlace" href="#formacion">Hazte instructor</a></li>
+        <li class="nav__extra"><a class="btn btn--fuego btn--ancho" href="#bonos">Reserva tu primera clase gratis</a></li>
+        <li class="nav__extra"><a class="btn btn--linea btn--ancho" href="#"><svg class="ico" aria-hidden="true"><use href="#i-usuario"/></svg>Acceder</a></li>
       </ul>
     </nav>
     <div class="cab__acciones">
       <a class="btn btn--linea btn--peq cab__acceder" href="#"><svg class="ico" aria-hidden="true"><use href="#i-usuario"/></svg>Acceder</a>
+      <a class="btn btn--fuego btn--peq cab__cta" href="#bonos">Primera clase gratis</a>
       <button class="cab__menu" id="cab-menu" type="button" aria-expanded="false" aria-controls="nav">
         <svg class="ico ico--menu" aria-hidden="true"><use href="#i-menu"/></svg>
         <svg class="ico ico--cerrar" aria-hidden="true"><use href="#i-cerrar"/></svg>
@@ -64,17 +70,21 @@
       </button>
     </div>
   </div>
+  <!-- Progreso de lectura: dónde estás en la página -->
+  <span class="cab__progreso" id="progreso" aria-hidden="true"></span>
 </header>
 
 <main id="principal">
 
   <!-- ===============================================================
-       1 · HERO — el rótulo y el espejo
-       Las 4 líneas encajan a sangre: font-size calc(100cqw/5.4) con un
-       font-stretch por línea medido por bisección en Chrome (0px de
-       desbordamiento verificado a 390 y 1440).
+       1 · HERO — la cuenta de entrada
+       Como un profe antes de empezar: la regla cuenta 1…8 y cada línea
+       del rótulo entra en un tiempo (5, 6, 7, 8). En el «1» siguiente
+       aparece el panel. Una sola vez; nada se repite en bucle.
+       Encaje a sangre: font-size 100cqw/5.4 y un font-stretch por línea
+       medido por bisección (0 px de desbordamiento).
        =============================================================== -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="rotulo">
     <div class="hero__foto" aria-hidden="true">
       <img src="assets/img/clase-sala-900.webp"
            srcset="assets/img/clase-sala-560.webp 560w, assets/img/clase-sala-900.webp 900w, assets/img/clase-sala-1400.webp 1400w"
@@ -83,36 +93,43 @@
 
     <div class="hero__env">
       <ol class="compas hero__compas" aria-hidden="true">
-        <li data-acento>1</li><li>2</li><li>3</li><li>4</li>
-        <li data-acento>5</li><li>6</li><li class="t7">7</li><li class="t8">8</li>
+        <li data-acento style="--b:1">1</li><li style="--b:2">2</li><li style="--b:3">3</li><li style="--b:4">4</li>
+        <li data-acento style="--b:5">5</li><li style="--b:6">6</li><li class="t7" style="--b:7">7</li><li class="t8" style="--b:8">8</li>
       </ol>
 
-      <div class="rotulo-caja">
-        <h1 class="rotulo" id="rotulo">
-          <span class="rotulo__l rotulo__l--studio l-hueco" style="--k:0">Studio</span>
-          <span class="rotulo__l rotulo__l--latin l-fuego" style="--k:1">Latin Urban</span>
-          <span class="rotulo__l rotulo__l--dance l-hueco" style="--k:2">Dance &amp; Fitness</span>
-          <span class="rotulo__l rotulo__l--madrid l-blanco" style="--k:3">Madrid</span>
-        </h1>
-        <!-- El espejo: su sala tiene una pared de espejo con tira LED azul.
-             El reflejo llega 90 ms tarde — un tiempo del compás. -->
-        <div class="espejo" aria-hidden="true">
-          <span class="espejo__led"></span>
-          <div class="espejo__copia">
-            <span class="rotulo__l rotulo__l--studio l-hueco">Studio</span>
-            <span class="rotulo__l rotulo__l--latin l-fuego">Latin Urban</span>
+      <div class="hero__rejilla">
+        <div class="rotulo-caja">
+          <h1 class="rotulo" id="rotulo">
+            <span class="rotulo__l rotulo__l--studio l-hueco" style="--k:0">Studio</span>
+            <span class="rotulo__l rotulo__l--latin l-fuego" style="--k:1">Latin Urban</span>
+            <span class="rotulo__l rotulo__l--dance l-hueco" style="--k:2">Dance &amp; Fitness</span>
+            <span class="rotulo__l rotulo__l--madrid l-blanco" style="--k:3">Madrid</span>
+          </h1>
+          <!-- El espejo: su sala tiene una pared de espejo con tira LED. -->
+          <div class="espejo" aria-hidden="true">
+            <span class="espejo__led"></span>
+            <div class="espejo__copia">
+              <span class="rotulo__l rotulo__l--studio l-hueco">Studio</span>
+              <span class="rotulo__l rotulo__l--latin l-fuego">Latin Urban</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="hero__pie">
-        <div class="hero__txt">
-          <p class="hero__claim">Tu lugar de baile en Madrid</p>
-          <p class="hero__sub">13 disciplinas · sin pareja y sin saber bailar<br class="solo-movil"> <span class="hero__metro"><svg class="ico" aria-hidden="true"><use href="#i-metro"/></svg>Metro Ciudad Lineal</span></p>
-        </div>
-        <div class="hero__ctas">
-          <a class="btn btn--fuego" href="#bonos">Reserva tu primera clase gratis</a>
-          <a class="btn btn--texto" href="#horario">Ver horarios <svg class="ico" aria-hidden="true"><use href="#i-flecha"/></svg></a>
+        <div class="hero__panel">
+          <p class="hero__claim" style="--i:0">Tu lugar de baile en Madrid</p>
+          <p class="hero__sub" style="--i:1">13 disciplinas, todos los niveles. Sin pareja y sin saber bailar.</p>
+          <div class="hero__ctas" style="--i:2">
+            <a class="btn btn--fuego" href="#bonos">Reserva tu primera clase gratis</a>
+            <a class="btn btn--texto" href="#horario">Ver horario <svg class="ico" aria-hidden="true"><use href="#i-flecha"/></svg></a>
+          </div>
+          <!-- Se rellena con el propio horario de la página (main.js) -->
+          <a class="proxima" id="proxima" href="#horario" style="--i:3" hidden>
+            <span class="proxima__et"><span class="proxima__punto" aria-hidden="true"></span>Próxima clase</span>
+            <span class="proxima__cuando" id="proxima-cuando"></span>
+            <span class="proxima__que" id="proxima-que"></span>
+            <svg class="ico proxima__ir" aria-hidden="true"><use href="#i-flecha-der"/></svg>
+          </a>
+          <p class="hero__donde" style="--i:4"><svg class="ico" aria-hidden="true"><use href="#i-metro"/></svg>Metro Ciudad Lineal · C. C. Alcalá Norte</p>
         </div>
       </div>
     </div>
@@ -153,7 +170,7 @@
       <h2 class="titular metodo__t entra entra--sube" id="metodo-t">Pasión, movimiento<br><em>y memoria</em> en cada paso</h2>
 
       <div class="bento">
-        <article class="bento__c bento__c--cita entra entra--sube" style="--i:0">
+        <article class="bento__c bento__c--cita entra entra--escala" style="--i:0">
           <blockquote class="cita">
             <p>Este no es un entrenamiento cualquiera… es una <b>experiencia única</b> donde tu cuerpo y tu mente se activan al ritmo de la música.</p>
             <p>Nuestro programa combina <b>baile, fitness y entrenamiento mental en bloques</b>, diseñados para que disfrutes mientras ejercitas tu <b>memoria, coordinación y concentración</b>.</p>
@@ -164,25 +181,25 @@
           </p>
         </article>
 
-        <article class="bento__c bento__c--bloque entra entra--sube" style="--i:1">
+        <article class="bento__c bento__c--bloque entra entra--escala" style="--i:1">
           <span class="bento__n" aria-hidden="true">01</span>
           <h3 class="bento__t">Baila</h3>
           <p>Baila con pasión y deja que cada movimiento te haga sentir más libre.</p>
         </article>
 
-        <article class="bento__c bento__c--bloque entra entra--sube" style="--i:2">
+        <article class="bento__c bento__c--bloque entra entra--escala" style="--i:2">
           <span class="bento__n" aria-hidden="true">02</span>
           <h3 class="bento__t">Entrena</h3>
           <p>Entrena tu cuerpo con rutinas llenas de energía y diversión.</p>
         </article>
 
-        <article class="bento__c bento__c--bloque entra entra--sube" style="--i:3">
+        <article class="bento__c bento__c--bloque entra entra--escala" style="--i:3">
           <span class="bento__n" aria-hidden="true">03</span>
           <h3 class="bento__t">Desafía</h3>
           <p>Desafía tu mente con bloques que estimulan la memoria y te mantienen enfocado.</p>
         </article>
 
-        <article class="bento__c bento__c--ciudades entra entra--sube" style="--i:4">
+        <article class="bento__c bento__c--ciudades entra entra--escala" style="--i:4">
           <p class="bento__et">El método se enseña en</p>
           <ol class="ciudades">
             <li><span class="ciudades__n">Madrid</span><span class="ciudades__d">Studio propio</span></li>
@@ -205,53 +222,53 @@
       <h2 class="titular clases__t entra entra--sube" id="clases-t">Elige <em>tu ritmo</em></h2>
       <p class="clases__intro entra entra--sube">Todos son bienvenidos: principiantes, avanzados, jóvenes y adultos.</p>
 
-      <ul class="clases__lista">
-        <li class="clase entra entra--sube" style="--i:0">
+      <ul class="clases__lista" data-ola>
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Latin Urban Dance</h3>
           <p class="clase__triada">Pasión · Movimiento · Memoria</p>
           <p class="clase__d">Baile, fitness y entrenamiento mental en bloques. Disfrutas mientras ejercitas memoria, coordinación y concentración.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:1">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Bachata <span class="clase__mat">Lady Style</span></h3>
           <p class="clase__triada">Sensualidad · Conexión · Ritmo</p>
           <p class="clase__d">Desde los pasos básicos hasta figuras más avanzadas, mejorando tu técnica, tu estilo y tu confianza en la pista.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:2">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Dancehall</h3>
           <p class="clase__triada">Energética · Consciente · Empowering</p>
           <p class="clase__d">Del foundation a su evolución más actual, con grooves y coreografías que respetan la esencia de esta cultura.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:3">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Reggaetón</h3>
           <p class="clase__triada">Flow · Intensidad · Diversión</p>
           <p class="clase__d">Coreografías potentes con la actitud del reggaetón. Mejora tu resistencia y disfruta del flow urbano más actual.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:4">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Street Jazz &amp; Heels</h3>
           <p class="clase__triada">Empoderamiento · Divertida · Esfuerzo</p>
           <p class="clase__d">Mucha técnica y una mezcla de estilos, lo clásico y lo urbano. Descubrirás lados que quizás no conocías de ti.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:5">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Afro Fusion</h3>
           <p class="clase__triada">Energía · Ritmo · Conexión</p>
           <p class="clase__d">Movimientos afrocaribeños con estilos urbanos. Te conecta con el ritmo y potencia tu confianza a través de la danza.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:6">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Zumba</h3>
           <p class="clase__triada">Intensa · Divertida · Motivadora</p>
           <p class="clase__d">Sudarás, reirás y saldrás con una sonrisa. No importa tu nivel: entrenas casi sin darte cuenta.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:7">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Commercial</h3>
           <p class="clase__triada">Estilo · Energía · Escenario</p>
           <p class="clase__d">Enfocada en que ganes muchísima confianza en ti mismo. Muy dinámica, con estilos variados.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:8">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Pilates Funcional</h3>
           <p class="clase__triada">Fuerza · Equilibrio · Bienestar</p>
           <p class="clase__d">Fortalece el cuerpo desde el centro, mejora la postura y gana flexibilidad.</p>
         </li>
-        <li class="clase entra entra--sube" style="--i:9">
+        <li class="clase entra entra--sube">
           <h3 class="clase__t">Niños <span class="clase__mat">Kids</span></h3>
           <p class="clase__triada">Diversión · Creatividad · Movimiento</p>
           <p class="clase__d">A través de juegos, música y movimiento desarrollan coordinación, confianza y expresión corporal.</p>
@@ -266,7 +283,7 @@
        =============================================================== -->
   <section class="seccion horario" id="horario" aria-labelledby="horario-t">
     <div class="env">
-      <p class="eyebrow entra entra--sube">Temporada 26/27</p>
+      <p class="eyebrow entra entra--sube">Temporada 2026</p>
       <h2 class="titular horario__t entra entra--sube" id="horario-t">Horario <em>semanal</em></h2>
       <p class="horario__intro entra entra--sube">Las clases marcadas <b class="badge badge--inline">Nivel básico</b> están pensadas para empezar de cero.</p>
 
@@ -274,12 +291,14 @@
         <button class="filtro filtro--on" type="button" data-f="todo" aria-pressed="true">Todas</button>
         <button class="filtro" type="button" data-f="basico" aria-pressed="false">Nivel básico</button>
         <button class="filtro" type="button" data-f="latino" aria-pressed="false">Latinos</button>
+        <button class="filtro" type="button" data-f="urbano" aria-pressed="false">Urbanos</button>
         <button class="filtro" type="button" data-f="fitness" aria-pressed="false">Fitness</button>
+        <button class="filtro" type="button" data-f="ninos" aria-pressed="false">Niños</button>
       </div>
 
-      <div class="tabla-caja entra">
+      <div class="tabla-caja" data-grupo>
         <table class="tabla" id="tabla">
-          <caption class="vo">Horario de clases por día y franja horaria, temporada 26/27</caption>
+          <caption class="vo">Horario de clases por día y franja horaria, temporada 2026</caption>
           <thead>
             <tr>
               <th scope="col"><span class="vo">Hora</span></th>
@@ -287,42 +306,53 @@
               <th scope="col">Jueves</th><th scope="col">Viernes</th><th scope="col">Sábado</th>
             </tr>
           </thead>
+          <!-- Transcripción literal de la imagen publicada el 24-09-2026
+               ("horarios temporada 2026.jpg"). Confirmar con el cliente. -->
           <tbody>
             <tr>
               <th scope="row" class="hora">11:00<span>12:00</span></th>
+              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="latino" href="#bonos"><span class="cl__n">Paso a paso</span></a></td>
+              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="latino" href="#bonos"><span class="cl__n">Paso a paso</span></a></td>
               <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
-              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Paso a paso</span><b class="badge">Nivel básico</b></a></td>
-              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
-              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Paso a paso</span><b class="badge">Nivel básico</b></a></td>
-              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
-              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
+              <td><a class="cl cl--fiesta" data-c="latino" href="#bonos"><span class="cl__n">Bailetón Latino</span></a></td>
             </tr>
             <tr>
               <th scope="row" class="hora">18:00<span>19:00</span></th>
-              <td><a class="cl" data-c="urbano basico" href="#bonos"><span class="cl__n">Comercial</span><b class="badge">Nivel básico</b></a></td>
-              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Tonificación Dance</span></a></td>
-              <td><a class="cl" data-c="urbano basico" href="#bonos"><span class="cl__n">Comercial</span><b class="badge">Nivel básico</b></a></td>
-              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Tonificación Dance</span></a></td>
-              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Paso a paso</span><b class="badge">Nivel básico</b></a></td>
-              <td><a class="cl cl--fiesta" data-c="latino" href="#bonos"><span class="cl__n">Bailetón Latino</span><span class="cl__extra">18:00–19:30 · con invitados</span></a></td>
+              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="ninos" href="#bonos"><span class="cl__n">Clase para niños</span><span class="cl__extra">7 a 11 años</span></a></td>
+              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="ninos" href="#bonos"><span class="cl__n">Clase para niños</span><span class="cl__extra">12 a 16 años</span></a></td>
+              <td><a class="cl" data-c="latino" href="#bonos"><span class="cl__n">Paso a paso</span></a></td>
+              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
             </tr>
             <tr>
               <th scope="row" class="hora">19:00<span>20:00</span></th>
+              <td><a class="cl" data-c="urbano basico" href="#bonos"><span class="cl__n">Comercial</span><b class="badge">Nivel básico</b></a></td>
               <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="urbano basico" href="#bonos"><span class="cl__n">Comercial</span><b class="badge">Nivel básico</b></a></td>
               <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
-              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
-              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
-              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
-              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Bachata</span><b class="badge">Nivel básico</b><span class="cl__extra">20:00–21:00</span></a></td>
+              <td><a class="cl" data-c="urbano" href="#bonos"><span class="cl__n">Reparto Cubano</span></a></td>
+              <td><a class="cl cl--fiesta" data-c="latino" href="#bonos"><span class="cl__n">Bailetón Latino</span></a></td>
             </tr>
             <tr>
-              <th scope="row" class="hora">20:15<span>21:30</span></th>
+              <th scope="row" class="hora">20:15<span>21:15</span></th>
               <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
-              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Salsa</span><b class="badge">Nivel básico</b><span class="cl__extra">con Naomi</span></a></td>
-              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Zumba</span></a></td>
+              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Salsa</span><b class="badge">Nivel básico</b></a></td>
               <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="fitness" href="#bonos"><span class="cl__n">Bailoterapia</span></a></td>
+              <td><a class="cl" data-c="latino basico" href="#bonos"><span class="cl__n">Bachata Lady Style</span><b class="badge">Nivel básico</b></a></td>
+            </tr>
+            <tr>
+              <th scope="row" class="hora">21:15<span>22:15</span></th>
               <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
-              <td><a class="cl" data-c="latino" href="#bonos"><span class="cl__n">Bachata Coreográfico</span><span class="cl__extra">21:00–22:00 · con Valeria</span></a></td>
+              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
+              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
+              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
+              <td class="vacia"><span class="vo">Sin clase</span><span aria-hidden="true">·</span></td>
+              <td><a class="cl" data-c="latino" href="#bonos"><span class="cl__n">Bachata Coreográfica</span><span class="cl__extra">Lady Style</span></a></td>
             </tr>
           </tbody>
         </table>
@@ -373,48 +403,48 @@
       <p class="eyebrow entra entra--sube">Nuestros instructores</p>
       <h2 class="titular equipo__t entra entra--sube" id="equipo-t">Un equipo dedicado<br>a <em>inspirarte</em></h2>
 
-      <ul class="equipo__lista">
-        <li class="persona entra entra--sube" style="--i:0">
+      <ul class="equipo__lista" data-ola>
+        <li class="persona entra entra--sube">
           <p class="persona__n">Junior Monzón</p>
           <p class="persona__rol">Fundador · CEO</p>
           <p class="persona__d">Director, coreógrafo, instructor y formador del programa LUDF. Su misión: inspirar, motivar y guiar a través de la música y el movimiento.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:1">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Ricardo Bolaños</p>
           <p class="persona__rol">Street Jazz · Heels</p>
           <p class="persona__d">«Me pueden llamar Rick.» Bailarín profesional formado en Perú (D1) desde hace 12 años. Street jazz, commercial y baile en tacones.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:2">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Jaison</p>
           <p class="persona__rol">Reparto · Hip Hop · AfroFusion</p>
           <p class="persona__d">Más de 10 años de experiencia internacional. Pionero del estilo Reparto en Cuba, con trayectoria en compañías y batallas de freestyle.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:3">
+        <li class="persona entra entra--sube">
           <p class="persona__n">José Orta</p>
           <p class="persona__rol">Dance Fitness</p>
           <p class="persona__d">De Isla de Margarita (Venezuela). Ballet clásico a los 14, profesional a los 22, compañía Teresa Carreño y RAZA en Buenos Aires. +9 años como instructor.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:4">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Maira</p>
           <p class="persona__rol">Dancehall · Afrodance</p>
           <p class="persona__d">Más de 10 años en danzas urbanas. Ha impartido clases en escuelas de todo el país, compartiendo técnica, energía, cultura y flow.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:5">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Frank Mendoza</p>
           <p class="persona__rol">Reggaetón · Dancehall</p>
           <p class="persona__d">Peruano, bailarín y coreógrafo de estilos comerciales. Ha competido en televisión en Perú. «Mis clases están enfocadas en que ganes confianza.»</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:6">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Laura</p>
           <p class="persona__rol">Latinos · Urbanos · Funcional</p>
           <p class="persona__d">«Bailar es mi lenguaje desde que era pequeña.» Cree en el poder transformador de la danza: no solo cambia cuerpos, también actitudes.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:7">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Sara Delbuono</p>
           <p class="persona__rol">Zumba</p>
           <p class="persona__d">Bailando desde los 7 años: ballet, moderno e hip hop. Instructora de Zumba certificada en 2019. También dietista-nutricionista.</p>
         </li>
-        <li class="persona entra entra--sube" style="--i:8">
+        <li class="persona entra entra--sube">
           <p class="persona__n">Marta</p>
           <p class="persona__rol">Bachata · Salsa</p>
           <p class="persona__d">Especializada en los ritmos latinos de pareja, con foco en la técnica, el estilo y la confianza en la pista.</p>
@@ -458,31 +488,31 @@
       <h2 class="titular bonos__t entra entra--sube" id="bonos-t">Elige <em>tu bono</em></h2>
 
       <ul class="bonos__lista">
-        <li class="bono bono--gratis entra">
+        <li class="bono bono--gratis">
           <h3 class="bono__t">Primera clase</h3>
           <p class="bono__d">Prueba tu primera clase gratis, cualquier estilo. ¡Descubre LUDF sin compromiso!</p>
           <p class="bono__p"><span class="bono__c bono__c--txt">Gratis</span></p>
           <a class="btn btn--linea btn--ancho" href="#">Reservar</a>
         </li>
-        <li class="bono entra">
+        <li class="bono">
           <h3 class="bono__t">Clase suelta</h3>
           <p class="bono__d">Una clase individual de Latin Urban Dance, Bachata, Salsa Cubana, Paso a paso, Ritmos Latinos, Zumba o de kids/niños.</p>
           <p class="bono__p"><span class="bono__c">9</span><span class="bono__m">€</span></p>
           <a class="btn btn--linea btn--ancho" href="#">Comprar</a>
         </li>
-        <li class="bono entra">
+        <li class="bono">
           <h3 class="bono__t">Bono Studio · 4 clases</h3>
           <p class="bono__d">¡Quema calorías y mejora tu mente en cada movimiento! Para todas las clases excepto Bachata.</p>
           <p class="bono__p"><span class="bono__c">29</span><span class="bono__m">€</span><span class="bono__u">7,25 € por clase</span></p>
           <a class="btn btn--linea btn--ancho" href="#">Comprar</a>
         </li>
-        <li class="bono entra">
+        <li class="bono">
           <h3 class="bono__t">Bono 8 clases <em>+ 2 gratis</em></h3>
           <p class="bono__d">La opción ideal para disfrutar de todas las clases del estudio, avanzar a tu ritmo y probar diferentes estilos, incluido Heels.</p>
           <p class="bono__p"><span class="bono__c">49</span><span class="bono__m">€</span><span class="bono__u">4,90 € por clase</span></p>
           <a class="btn btn--linea btn--ancho" href="#">Comprar</a>
         </li>
-        <li class="bono bono--top entra">
+        <li class="bono bono--top">
           <p class="bono__sello">Precio de apertura</p>
           <h3 class="bono__t">Abono ilimitado LUDF</h3>
           <p class="bono__d">Disfruta de cualquier clase y estilo, sin límite.</p>
@@ -492,7 +522,7 @@
           </p>
           <a class="btn btn--fuego btn--ancho" href="#">Comprar</a>
         </li>
-        <li class="bono entra">
+        <li class="bono">
           <h3 class="bono__t">Bono Bachata</h3>
           <p class="bono__d">Bachata Ladies Style para mejorar pasos, movimiento corporal, caderas y estilo de brazos. ¡Todos los niveles!</p>
           <p class="bono__p"><span class="bono__c">30</span><span class="bono__m">€</span><span class="bono__per">/mes</span></p>
@@ -500,7 +530,7 @@
         </li>
       </ul>
 
-      <p class="bonos__nota entra">Matrícula gratis. Si prefieres pagar en efectivo, también puedes hacerlo directamente en el Studio — o por Bizum.</p>
+      <p class="bonos__nota">Matrícula gratis. Si prefieres pagar en efectivo, también puedes hacerlo directamente en el Studio — o por Bizum.</p>
     </div>
   </section>
 
@@ -508,10 +538,16 @@
        10 · MASTERCLASSES — único scroll horizontal de la página
        =============================================================== -->
   <section class="seccion seccion--elevada tour" aria-labelledby="tour-t">
-    <div class="env">
-      <p class="eyebrow entra entra--sube">Próximas fechas</p>
-      <h2 class="titular tour__t entra entra--sube" id="tour-t">El método <em>de gira</em></h2>
-      <p class="tour__intro entra entra--sube">El programa que se enseña en Alemania se aprende aquí, en Ciudad Lineal.</p>
+    <div class="env tour__cab">
+      <div>
+        <p class="eyebrow entra entra--sube">Próximas fechas</p>
+        <h2 class="titular tour__t entra entra--sube" id="tour-t">El método <em>de gira</em></h2>
+        <p class="tour__intro entra entra--sube">El programa que se enseña en Alemania se aprende aquí, en Ciudad Lineal.</p>
+      </div>
+      <div class="tour__ctrl" role="group" aria-label="Desplazar las fechas">
+        <button class="tour__b" type="button" data-dir="-1" aria-controls="tour-pista"><svg class="ico" aria-hidden="true"><use href="#i-izq"/></svg><span class="vo">Anterior</span></button>
+        <button class="tour__b" type="button" data-dir="1" aria-controls="tour-pista"><svg class="ico" aria-hidden="true"><use href="#i-der"/></svg><span class="vo">Siguiente</span></button>
+      </div>
     </div>
     <ul class="tour__pista" id="tour-pista">
       <li class="fecha">
@@ -566,7 +602,7 @@
 
   <div class="env pie__env">
     <div class="pie__col pie__col--marca">
-      <img class="pie__logo" src="assets/img/logo.webp" alt="Latin Urban Dance &amp; Fitness" width="1000" height="622" loading="lazy" decoding="async">
+      <img class="pie__logo" src="assets/img/logo-360.png" alt="Latin Urban Dance &amp; Fitness" width="360" height="225" loading="lazy" decoding="async">
       <ul class="pie__redes">
         <li><a href="https://www.instagram.com/studio_latinurbandance/" aria-label="Instagram"><svg class="ico" aria-hidden="true"><use href="#i-ig"/></svg></a></li>
         <li><a href="#" aria-label="TikTok"><svg class="ico" aria-hidden="true"><use href="#i-tk"/></svg></a></li>
