@@ -3,8 +3,8 @@
    Todo el contenido es legible sin JavaScript: el horario es una tabla,
    las clases y las fechas son texto. Esto añade el movimiento y la
    interacción: títulos que entran palabra a palabra, el hero que se
-   ajusta a la pantalla, la cinta que reacciona al
-   scroll, los discos, el horario con vista previa, las acreditaciones
+   ajusta a la pantalla, la cinta a velocidad constante,
+   los discos, el horario con vista previa, las acreditaciones
    que se balancean, el libro de la gira y las dudas apiladas.
    Los bucles solo corren con su sección a la vista.
    Parámetro ?ss → sin animaciones (para capturas).
@@ -192,10 +192,14 @@
   const rejilla = $('.hero__rejilla');
 
   // Que quepa entero sin scroll: si sobra alto, encoge el rótulo lo justo
+  // El alto de referencia es el del hero (min-height: 100svh), no
+  // innerHeight: en el móvil innerHeight cambia al esconderse la barra de
+  // direcciones durante el scroll, y el rótulo cambiaría de tamaño a mitad
+  // de página. 100svh es estable.
   const ajustarHero = () => {
     if (!hero || !rotulo) return;
     hero.style.setProperty('--ajuste', '1');
-    const vh = window.innerHeight;
+    const vh = parseFloat(getComputedStyle(hero).minHeight) || window.innerHeight;
     const exceso = hero.offsetHeight - vh;
     if (exceso <= 1) return;
     const dosColumnas = getComputedStyle(rejilla).gridTemplateColumns.split(' ').length > 1;
@@ -212,60 +216,63 @@
     setTimeout(() => hero.classList.add('contado'), 1800);
   }
 
-  /* ---------- Cinta: avanza sola y acelera e inclina con el scroll ---------- */
+  /* ---------- Cinta: velocidad constante ----------
+     La mueve una animación CSS de transform, que el navegador ejecuta
+     fuera del hilo principal: el scroll no la acelera, no la frena ni le
+     cambia el sentido. Aquí solo se duplica cada lista (bucle sin corte)
+     y se calcula la duración para que avance a los mismos px/s en
+     cualquier pantalla. No se para al pasar el ratón: al hacer scroll con
+     el cursor quieto, la cinta pasaría por debajo y se detendría. Para
+     pararla está el botón de pausa (y el movimiento reducido). */
   const cinta = $('.cinta');
   const btnCinta = $('#cinta-btn');
+  let medirCinta = () => {};
   if (cinta && !quieto) {
     const carriles = [
-      { el: $('.cinta__carril--a'), sentido: -1, base: 42 },
-      { el: $('.cinta__carril--b'), sentido: 1, base: 30 }
-    ].filter(c => c.el);
-    // duplicado para un bucle sin corte (la copia, oculta a lectores)
-    ['cinta-a', 'cinta-b'].forEach(id => {
-      const lista = document.getElementById(id);
-      if (!lista) return;
+      { el: $('.cinta__carril--a'), lista: $('#cinta-a'), vel: 42 },   // px/s
+      { el: $('.cinta__carril--b'), lista: $('#cinta-b'), vel: 30 }
+    ].filter(c => c.el && c.lista);
+    // la copia, oculta a lectores de pantalla: las disciplinas se leen una vez
+    carriles.forEach(({ lista }) => {
       const copia = lista.cloneNode(true);
       copia.removeAttribute('id');
       copia.setAttribute('aria-hidden', 'true');
       lista.parentElement.appendChild(copia);
     });
-    carriles.forEach(c => { c.x = c.sentido > 0 ? -c.el.scrollWidth / 2 : 0; });
 
-    let corriendo = false, t0 = 0, yAnt = scrollY, vel = 0, sesgo = 0, marcha = 1, pausa = false, dir = 1;
-    const paso = t => {
-      if (!corriendo) return;
-      const dt = Math.min(64, t - (t0 || t)) / 1000; t0 = t;
-      const dy = scrollY - yAnt; yAnt = scrollY;
-      if (dy) dir = dy > 0 ? 1 : -1;
-      vel += ((dt ? dy / dt : 0) - vel) * .12;                       // px/s suavizado
-      marcha += ((pausa ? 0 : 1) - marcha) * .08;
-      const empuje = limita(Math.abs(vel) * .5, 0, 520);
-      sesgo += (limita(-vel * .006, -9, 9) - sesgo) * .1;
+    // duración = una lista / velocidad. Si cambia (al girar el móvil, por
+    // ejemplo), se conserva el punto del bucle para que no dé un salto.
+    medirCinta = () => {
       carriles.forEach(c => {
-        const mitad = c.el.scrollWidth / 2;
-        c.x += (c.base + empuje) * marcha * c.sentido * dir * dt;
-        if (c.x <= -mitad) c.x += mitad;
-        if (c.x > 0) c.x -= mitad;
-        c.el.style.transform = `translate3d(${c.x.toFixed(1)}px,0,0) skewX(${(sesgo * marcha).toFixed(2)}deg)`;
+        const seg = c.lista.offsetWidth / c.vel;
+        if (!(seg > 0)) return;
+        const anim = c.el.getAnimations ? c.el.getAnimations()[0] : null;
+        const antes = anim ? anim.effect.getComputedTiming().duration : 0;   // ms
+        // mismo ancho (p. ej. la barra del móvil que aparece al hacer
+        // scroll dispara un resize): no se toca nada
+        if (antes > 0 && Math.abs(antes - seg * 1000) < 50) return;
+        const punto = antes > 0 ? (anim.currentTime % antes) / antes : 0;
+        c.el.style.setProperty('--dur', seg.toFixed(2) + 's');
+        if (antes > 0) {
+          getComputedStyle(c.el).animationDuration;         // aplica la duración nueva
+          anim.currentTime = punto * seg * 1000;
+        }
       });
-      requestAnimationFrame(paso);
     };
-    const arrancar = si => {
-      if (si && !corriendo) { corriendo = true; t0 = 0; yAnt = scrollY; requestAnimationFrame(paso); }
-      if (!si) corriendo = false;
-    };
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(([e]) => arrancar(e.isIntersecting), { rootMargin: '60px 0px' }).observe(cinta);
-    } else arrancar(true);
+    // Arranca con la fuente ya cargada: con la de reserva el ancho sería otro
+    const arrancar = () => { medirCinta(); cinta.classList.add('en-marcha'); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(arrancar);
+    else arrancar();
 
-    cinta.addEventListener('pointerenter', () => { if (!cinta.classList.contains('pausada')) pausa = true; });
-    cinta.addEventListener('pointerleave', () => { if (!cinta.classList.contains('pausada')) pausa = false; });
-    cinta.addEventListener('focusin', () => { pausa = true; });
-    cinta.addEventListener('focusout', () => { if (!cinta.classList.contains('pausada')) pausa = false; });
+    // Fuera de pantalla se detiene (no gasta) y vuelve antes de asomar
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => cinta.classList.toggle('fuera', !e.isIntersecting),
+        { rootMargin: '200px 0px' }).observe(cinta);
+    }
+
     if (btnCinta) {
       btnCinta.addEventListener('click', () => {
         const pausada = cinta.classList.toggle('pausada');
-        pausa = pausada;
         btnCinta.setAttribute('aria-pressed', String(pausada));
         $('.vo', btnCinta).textContent = pausada
           ? 'Reanudar el movimiento de las disciplinas'
@@ -590,7 +597,7 @@
   }, { passive: true });
 
   // Al cargar las fuentes cambian las medidas: se recalcula todo lo que mide
-  const remedir = () => { ajustarHero(); llenar(); numerarOla(); medirLibro(); alScroll(); };
+  const remedir = () => { ajustarHero(); llenar(); numerarOla(); medirLibro(); medirCinta(); alScroll(); };
   let rz;
   addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(remedir, 150); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(remedir);
