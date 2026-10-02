@@ -379,8 +379,10 @@
 @keyframes entra-panel{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* =====================================================================
-   2 · CINTA — dos carriles opuestos (los mueve main.js: aceleran y se
-   inclinan con la velocidad del scroll)
+   2 · CINTA — dos carriles opuestos a velocidad constante
+   Animación CSS de transform: corre fuera del hilo principal, así que
+   el scroll no la altera. main.js duplica cada lista y fija --dur para
+   que avance a los mismos px/s en cualquier ancho.
    ===================================================================== */
 .cinta{
   position:relative;
@@ -422,7 +424,12 @@
 .cinta__carril--b .cinta__lista li::after{
   background:rgba(100,254,218,.4);box-shadow:none;width:5px;height:5px;
 }
-.js .cinta__carril{will-change:transform}
+/* -50 % = una lista exacta: con la copia detrás, el bucle no tiene corte */
+.cinta.en-marcha .cinta__carril--a{animation:desfila var(--dur,50s) linear infinite}
+.cinta.en-marcha .cinta__carril--b{animation:desfila var(--dur,50s) linear infinite reverse}
+.cinta.pausada .cinta__carril,
+.cinta.fuera .cinta__carril{animation-play-state:paused}
+@keyframes desfila{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 .cinta__btn{
   position:absolute;right:8px;top:50%;
@@ -439,7 +446,10 @@
 .cinta__btn[aria-pressed="true"] .ico--pausa{display:none}
 .cinta__btn[aria-pressed="true"] .ico--play{display:block}
 @media (max-width:639px){.cinta__btn{display:none}}
-@media (prefers-reduced-motion:reduce){.cinta__btn{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .cinta__btn{display:none}
+  .cinta.en-marcha .cinta__carril{animation:none}
+}
 
 /* =====================================================================
    3 · EL MÉTODO — bento; los tres bloques tienen su propio gesto
