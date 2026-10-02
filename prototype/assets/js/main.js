@@ -3,7 +3,7 @@
    Todo el contenido es legible sin JavaScript: el horario es una tabla,
    las clases y las fechas son texto. Esto añade el movimiento y la
    interacción: títulos que entran palabra a palabra, el hero que se
-   ajusta a la pantalla, el foco de sala, la cinta que reacciona al
+   ajusta a la pantalla, la cinta que reacciona al
    scroll, los discos, el horario con vista previa, las acreditaciones
    que se balancean, el libro de la gira y las dudas apiladas.
    Los bucles solo corren con su sección a la vista.
@@ -210,27 +210,6 @@
   if (hero && !quieto) {
     // después de la cuenta de entrada, el compás sigue sonando
     setTimeout(() => hero.classList.add('contado'), 1800);
-
-    // Foco de sala: sigue al cursor con inercia
-    const foco = $('#foco');
-    if (foco && raton) {
-      let fx = innerWidth * .32, fy = innerHeight * .6, tx = fx, ty = fy, corre = false;
-      const paso = () => {
-        fx += (tx - fx) * .09; fy += (ty - fy) * .09;
-        foco.style.transform = `translate3d(${fx.toFixed(1)}px,${fy.toFixed(1)}px,0)`;
-        if (Math.abs(tx - fx) + Math.abs(ty - fy) > .5 && corre) requestAnimationFrame(paso);
-        else corre = false;
-      };
-      const mover = () => { if (!corre) { corre = true; requestAnimationFrame(paso); } };
-      hero.addEventListener('pointermove', e => {
-        const r = hero.getBoundingClientRect();
-        tx = e.clientX - r.left; ty = e.clientY - r.top;
-        mover();
-      });
-      hero.addEventListener('pointerenter', () => hero.classList.add('con-foco'));
-      hero.addEventListener('pointerleave', () => hero.classList.remove('con-foco'));
-      foco.style.transform = `translate3d(${fx}px,${fy}px,0)`;
-    }
   }
 
   /* ---------- Cinta: avanza sola y acelera e inclina con el scroll ---------- */
