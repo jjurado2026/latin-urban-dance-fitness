@@ -1,10 +1,12 @@
 /* =====================================================================
    LATIN URBAN DANCE & FITNESS — "Compás"
-   Todo el contenido es legible sin JavaScript: el horario es una tabla
-   real, las clases son texto y los precios están en el HTML.
-   Esto añade: entradas por scroll, próxima clase, filtros del horario,
-   cintas, carrusel de fechas, menú, cabecera compacta, progreso de
-   lectura y barra fija.
+   Todo el contenido es legible sin JavaScript: el horario es una tabla,
+   las clases y las fechas son texto. Esto añade el movimiento y la
+   interacción: títulos que entran palabra a palabra, el hero que se
+   ajusta a la pantalla, el foco de sala, la cinta que reacciona al
+   scroll, los discos, el horario con vista previa, las acreditaciones
+   que se balancean, el libro de la gira y las dudas apiladas.
+   Los bucles solo corren con su sección a la vista.
    Parámetro ?ss → sin animaciones (para capturas).
    ===================================================================== */
 (() => {
@@ -12,36 +14,87 @@
 
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+  const limita = (v, a, b) => Math.min(b, Math.max(a, v));
 
   const captura  = location.search.includes('ss');
   const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const quieto   = captura || reducido;
+  const raton    = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   if (captura) {
     document.documentElement.classList.add('captura');
     $$('img[loading="lazy"]').forEach(i => (i.loading = 'eager'));
   }
 
+  /* ---------- Titulares: palabra a palabra ----------
+     Se parte el texto en .w > .w__i conservando <br>, <em> y los
+     espacios, así que un lector de pantalla lee la frase igual. */
+  const partir = h => {
+    let wi = 0;
+    const recorre = nodo => {
+      [...nodo.childNodes].forEach(n => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(p => {
+            if (!p) return;
+            if (/^\s+$/.test(p)) { frag.append(' '); return; }
+            const w = document.createElement('span');
+            const i = document.createElement('span');
+            w.className = 'w'; i.className = 'w__i';
+            i.textContent = p;
+            i.style.setProperty('--wi', wi++);
+            w.append(i);
+            frag.append(w);
+          });
+          n.replaceWith(frag);
+        } else if (n.nodeType === 1 && n.nodeName !== 'BR') {
+          recorre(n);
+        }
+      });
+    };
+    recorre(h);
+    h.classList.add('partido');
+  };
+  $$('.titular').forEach(partir);
+
+  // El claim del pie, letra a letra
+  $$('[data-letras]').forEach(el => {
+    const texto = el.textContent;
+    el.textContent = '';
+    [...texto].forEach((ch, li) => {
+      if (ch === ' ') { el.append(' '); return; }
+      const s = document.createElement('span');
+      s.className = 'l';
+      s.textContent = ch;
+      s.style.setProperty('--li', li);
+      el.append(s);
+    });
+  });
+
   /* ---------- Horario: una sola fuente de datos ----------
-     La próxima clase del hero y las etiquetas de día en móvil salen de la
-     tabla. Cambiar una hora en el HTML la cambia en todas partes. */
+     La próxima clase del hero, la columna de hoy y las etiquetas de día
+     en móvil salen de la tabla. */
   const tabla = $('#tabla');
   const dias = tabla ? $$('thead th', tabla).slice(1).map(th => th.textContent.trim()) : [];
   const clasesSemana = [];
+  const ahora = new Date();
+  const hoy = ahora.getDay();               // 0 domingo … 6 sábado
 
   if (tabla) {
     $$('tbody tr', tabla).forEach((tr, fila) => {
       const inicio = ($('.hora', tr)?.firstChild?.textContent || '').trim();
       const [hh, mm] = inicio.split(':').map(Number);
       $$('td', tr).forEach((td, col) => {
+        if (col + 1 === hoy) td.classList.add('hoy');
         const cl = $('.cl', td);
         if (!cl) return;
         if (dias[col]) cl.setAttribute('data-dia', dias[col].slice(0, 3));
-        // Barrido de la semana: izquierda → derecha, franja a franja
+        if (col + 1 === hoy) cl.classList.add('hoy');
         td.classList.add('g');
         td.style.setProperty('--i', col + fila);
         clasesSemana.push({
-          dia: col + 1,                              // lunes = 1 … sábado = 6 (Date.getDay)
+          el: cl,
+          dia: col + 1,
           min: hh * 60 + mm,
           hora: inicio,
           nombre: $('.cl__n', cl)?.textContent.trim() || '',
@@ -50,16 +103,15 @@
         });
       });
     });
+    const thHoy = $$('thead th', tabla)[hoy];
+    if (hoy >= 1 && thHoy) thHoy.classList.add('hoy');
   }
 
-  /* ---------- Próxima clase (hero) ---------- */
+  /* ---------- Próxima clase (hero y horario) ---------- */
   const proxima = $('#proxima');
   if (proxima && clasesSemana.length) {
-    const ahora = new Date();
-    const hoy = ahora.getDay();
     const minAhora = ahora.getHours() * 60 + ahora.getMinutes();
     let hallada = null;
-
     for (let d = 0; d < 7 && !hallada; d++) {
       const dia = (hoy + d) % 7;
       const candidatas = clasesSemana
@@ -67,10 +119,10 @@
         .sort((a, b) => a.min - b.min);
       if (candidatas.length) hallada = { c: candidatas[0], d, dia };
     }
-
     if (hallada) {
       const { c, d, dia } = hallada;
       const cuando = d === 0 ? 'Hoy' : d === 1 ? 'Mañana' : (dias[dia - 1] || '');
+      $('#proxima-et').textContent = 'Próxima clase';
       $('#proxima-cuando').textContent = `${cuando}, ${c.hora}`;
       const que = $('#proxima-que');
       que.textContent = c.nombre + (c.extra ? ` · ${c.extra}` : '');
@@ -81,24 +133,32 @@
         que.append(b);
       }
       proxima.setAttribute('aria-label', `Próxima clase: ${cuando}, ${c.hora}, ${c.nombre}. Ver el horario`);
-      proxima.hidden = false;
+      // y en la tabla, la misma clase marcada
+      c.el.classList.add('siguiente');
+      const ya = document.createElement('span');
+      ya.className = 'cl__ya';
+      ya.textContent = 'Próxima';
+      c.el.append(ya);
     }
   }
 
-  /* ---------- Ola: el --i de cada tarjeta es su columna real ----------
-     Así las rejillas entran fila a fila, de izquierda a derecha, sea cual
-     sea el número de columnas del ancho actual. */
+  /* ---------- Ola: el --i de cada pieza es su columna real ---------- */
   const olas = $$('[data-ola]');
   const numerarOla = () => {
     olas.forEach(lista => {
-      const cols = getComputedStyle(lista).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-      [...lista.children].forEach((el, i) => el.style.setProperty('--i', i % cols));
+      const hijos = [...lista.children];
+      if (!hijos.length) return;
+      const top0 = hijos[0].offsetTop;
+      let cols = hijos.findIndex(h => h.offsetTop !== top0);
+      if (cols < 1) cols = hijos.length;
+      hijos.forEach((h, i) => h.style.setProperty('--i', i % cols));
     });
+    $$('.pase').forEach((p, i) => p.style.setProperty('--i', Math.min(i, 6)));
   };
   numerarOla();
 
-  /* ---------- Entradas por scroll: una vez por elemento ---------- */
-  const entradas = $$('.entra, [data-grupo]');
+  /* ---------- Entradas por scroll: una vez ---------- */
+  const entradas = $$('.entra, [data-grupo], .titular, [data-revela]');
   if (quieto || !('IntersectionObserver' in window)) {
     entradas.forEach(el => el.classList.add('visible'));
   } else {
@@ -112,11 +172,76 @@
     entradas.forEach(el => obs.observe(el));
   }
 
-  /* ---------- Cintas: se duplican para que el bucle no tenga corte ----------
-     La copia se oculta a la tecnología asistiva: las disciplinas se leen
-     una sola vez. Fuera de pantalla se paran (no gastan batería). */
+  /* ---------- «Vivo»: los bucles solo corren a la vista ---------- */
+  const enVista = new Map();                 // elemento → callbacks al entrar/salir
+  const vivos = $$('[data-vivo]');
+  if (!quieto && 'IntersectionObserver' in window) {
+    const obsVivo = new IntersectionObserver(es => {
+      es.forEach(e => {
+        e.target.classList.toggle('vivo', e.isIntersecting);
+        (enVista.get(e.target) || []).forEach(fn => fn(e.isIntersecting));
+      });
+    }, { rootMargin: '80px 0px' });
+    vivos.forEach(el => obsVivo.observe(el));
+  }
+  const alVer = (el, fn) => { if (!el) return; enVista.set(el, [...(enVista.get(el) || []), fn]); };
+
+  /* ---------- Hero ---------- */
+  const hero = $('.hero');
+  const rotulo = $('.rotulo');
+  const rejilla = $('.hero__rejilla');
+
+  // Que quepa entero sin scroll: si sobra alto, encoge el rótulo lo justo
+  const ajustarHero = () => {
+    if (!hero || !rotulo) return;
+    hero.style.setProperty('--ajuste', '1');
+    const vh = window.innerHeight;
+    const exceso = hero.offsetHeight - vh;
+    if (exceso <= 1) return;
+    const dosColumnas = getComputedStyle(rejilla).gridTemplateColumns.split(' ').length > 1;
+    const caja = $('.rotulo-caja');
+    const panel = $('.hero__panel');
+    if (dosColumnas && panel.offsetHeight > caja.offsetHeight) return; // manda el panel
+    const h = rotulo.offsetHeight;
+    if (h > 0) hero.style.setProperty('--ajuste', limita((h - exceso - 2) / h, .4, 1).toFixed(3));
+  };
+  ajustarHero();
+
+  if (hero && !quieto) {
+    // después de la cuenta de entrada, el compás sigue sonando
+    setTimeout(() => hero.classList.add('contado'), 1800);
+
+    // Foco de sala: sigue al cursor con inercia
+    const foco = $('#foco');
+    if (foco && raton) {
+      let fx = innerWidth * .32, fy = innerHeight * .6, tx = fx, ty = fy, corre = false;
+      const paso = () => {
+        fx += (tx - fx) * .09; fy += (ty - fy) * .09;
+        foco.style.transform = `translate3d(${fx.toFixed(1)}px,${fy.toFixed(1)}px,0)`;
+        if (Math.abs(tx - fx) + Math.abs(ty - fy) > .5 && corre) requestAnimationFrame(paso);
+        else corre = false;
+      };
+      const mover = () => { if (!corre) { corre = true; requestAnimationFrame(paso); } };
+      hero.addEventListener('pointermove', e => {
+        const r = hero.getBoundingClientRect();
+        tx = e.clientX - r.left; ty = e.clientY - r.top;
+        mover();
+      });
+      hero.addEventListener('pointerenter', () => hero.classList.add('con-foco'));
+      hero.addEventListener('pointerleave', () => hero.classList.remove('con-foco'));
+      foco.style.transform = `translate3d(${fx}px,${fy}px,0)`;
+    }
+  }
+
+  /* ---------- Cinta: avanza sola y acelera e inclina con el scroll ---------- */
   const cinta = $('.cinta');
-  if (!quieto) {
+  const btnCinta = $('#cinta-btn');
+  if (cinta && !quieto) {
+    const carriles = [
+      { el: $('.cinta__carril--a'), sentido: -1, base: 42 },
+      { el: $('.cinta__carril--b'), sentido: 1, base: 30 }
+    ].filter(c => c.el);
+    // duplicado para un bucle sin corte (la copia, oculta a lectores)
     ['cinta-a', 'cinta-b'].forEach(id => {
       const lista = document.getElementById(id);
       if (!lista) return;
@@ -125,48 +250,99 @@
       copia.setAttribute('aria-hidden', 'true');
       lista.parentElement.appendChild(copia);
     });
-    if (cinta && 'IntersectionObserver' in window) {
-      new IntersectionObserver(([e]) => cinta.classList.toggle('fuera', !e.isIntersecting))
-        .observe(cinta);
+    carriles.forEach(c => { c.x = c.sentido > 0 ? -c.el.scrollWidth / 2 : 0; });
+
+    let corriendo = false, t0 = 0, yAnt = scrollY, vel = 0, sesgo = 0, marcha = 1, pausa = false, dir = 1;
+    const paso = t => {
+      if (!corriendo) return;
+      const dt = Math.min(64, t - (t0 || t)) / 1000; t0 = t;
+      const dy = scrollY - yAnt; yAnt = scrollY;
+      if (dy) dir = dy > 0 ? 1 : -1;
+      vel += ((dt ? dy / dt : 0) - vel) * .12;                       // px/s suavizado
+      marcha += ((pausa ? 0 : 1) - marcha) * .08;
+      const empuje = limita(Math.abs(vel) * .5, 0, 520);
+      sesgo += (limita(-vel * .006, -9, 9) - sesgo) * .1;
+      carriles.forEach(c => {
+        const mitad = c.el.scrollWidth / 2;
+        c.x += (c.base + empuje) * marcha * c.sentido * dir * dt;
+        if (c.x <= -mitad) c.x += mitad;
+        if (c.x > 0) c.x -= mitad;
+        c.el.style.transform = `translate3d(${c.x.toFixed(1)}px,0,0) skewX(${(sesgo * marcha).toFixed(2)}deg)`;
+      });
+      requestAnimationFrame(paso);
+    };
+    const arrancar = si => {
+      if (si && !corriendo) { corriendo = true; t0 = 0; yAnt = scrollY; requestAnimationFrame(paso); }
+      if (!si) corriendo = false;
+    };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => arrancar(e.isIntersecting), { rootMargin: '60px 0px' }).observe(cinta);
+    } else arrancar(true);
+
+    cinta.addEventListener('pointerenter', () => { if (!cinta.classList.contains('pausada')) pausa = true; });
+    cinta.addEventListener('pointerleave', () => { if (!cinta.classList.contains('pausada')) pausa = false; });
+    cinta.addEventListener('focusin', () => { pausa = true; });
+    cinta.addEventListener('focusout', () => { if (!cinta.classList.contains('pausada')) pausa = false; });
+    if (btnCinta) {
+      btnCinta.addEventListener('click', () => {
+        const pausada = cinta.classList.toggle('pausada');
+        pausa = pausada;
+        btnCinta.setAttribute('aria-pressed', String(pausada));
+        $('.vo', btnCinta).textContent = pausada
+          ? 'Reanudar el movimiento de las disciplinas'
+          : 'Pausar el movimiento de las disciplinas';
+      });
     }
   }
 
-  const btnCinta = $('#cinta-btn');
-  if (cinta && btnCinta) {
-    btnCinta.addEventListener('click', () => {
-      const pausada = cinta.classList.toggle('pausada');
-      btnCinta.setAttribute('aria-pressed', String(pausada));
-      $('.vo', btnCinta).textContent = pausada
-        ? 'Reanudar el movimiento de las disciplinas'
-        : 'Pausar el movimiento de las disciplinas';
+  /* ---------- Discos: la funda se da la vuelta ---------- */
+  $$('.disco').forEach(disco => {
+    const btn = $('.disco__girar', disco);
+    const nombre = $('.disco__nombre', disco)?.textContent.trim() || '';
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const girado = disco.classList.toggle('girado');
+      btn.setAttribute('aria-pressed', String(girado));
+      $('.vo', btn).textContent = girado ? `Volver a la portada de ${nombre}` : `Leer de qué va ${nombre}`;
     });
-  }
+  });
 
-  /* ---------- Filtros del horario ---------- */
+  /* ---------- Horario: filtros con vista previa al pasar ---------- */
   if (tabla) {
     const filtros = $$('.filtro');
     const clases = $$('.cl', tabla);
     let avisa = null;
 
+    const previa = f => {
+      clases.forEach(cl => {
+        if (!f || f === 'todo') { cl.classList.remove('previa', 'apagada'); return; }
+        const ok = (cl.dataset.c || '').split(/\s+/).includes(f);
+        cl.classList.toggle('previa', ok);
+        cl.classList.toggle('apagada', !ok);
+      });
+    };
+
     filtros.forEach(btn => {
+      btn.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') previa(btn.dataset.f); });
+      btn.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') previa(null); });
+      btn.addEventListener('focus', () => { if (btn.matches(':focus-visible')) previa(btn.dataset.f); });
+      btn.addEventListener('blur', () => previa(null));
+
       btn.addEventListener('click', () => {
         const f = btn.dataset.f;
-
+        previa(null);
         filtros.forEach(b => {
           const on = b === btn;
           b.classList.toggle('filtro--on', on);
           b.setAttribute('aria-pressed', String(on));
         });
-
         let visibles = 0;
         clases.forEach(cl => {
           const ok = f === 'todo' || (cl.dataset.c || '').split(/\s+/).includes(f);
           cl.classList.toggle('oculta', !ok);
-          cl.tabIndex = ok ? 0 : -1;       // atenuadas: siguen a la vista, fuera del tabulador
+          cl.tabIndex = ok ? 0 : -1;
           if (ok) visibles++;
         });
-
-        // Se anuncia el resultado a quien no ve la tabla
         if (!avisa) {
           avisa = document.createElement('p');
           avisa.className = 'vo';
@@ -180,17 +356,13 @@
     });
   }
 
-  /* ---------- Carrusel de fechas: flechas y arrastre con ratón ---------- */
-  const pista = $('#tour-pista');
-  if (pista) {
-    const botones = $$('.tour__b');
-    const paso = () => (pista.querySelector('.fecha')?.getBoundingClientRect().width || 300) + 20;
-
+  /* ---------- Carril horizontal: flechas y arrastre con ratón ---------- */
+  const carril = (pista, botones) => {
+    if (!pista) return;
+    const paso = () => (pista.firstElementChild?.getBoundingClientRect().width || 300) + 24;
     const actualizar = () => {
       const max = pista.scrollWidth - pista.clientWidth - 2;
-      botones.forEach(b => {
-        b.disabled = b.dataset.dir === '-1' ? pista.scrollLeft <= 2 : pista.scrollLeft >= max;
-      });
+      botones.forEach(b => { b.disabled = b.dataset.dir === '-1' ? pista.scrollLeft <= 2 : pista.scrollLeft >= max; });
     };
     botones.forEach(b => b.addEventListener('click', () => {
       pista.scrollBy({ left: Number(b.dataset.dir) * paso(), behavior: quieto ? 'auto' : 'smooth' });
@@ -199,7 +371,6 @@
     addEventListener('resize', actualizar);
     actualizar();
 
-    // Arrastre: solo con ratón; el táctil ya desliza de forma nativa
     let x0 = 0, s0 = 0, movido = false, activo = false;
     pista.addEventListener('pointerdown', e => {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
@@ -214,19 +385,181 @@
     addEventListener('pointerup', () => {
       if (!activo) return;
       activo = false;
-      if (movido) {
-        // Suelta y deja que el snap asiente la tarjeta más cercana
-        requestAnimationFrame(() => pista.classList.remove('arrastrando'));
+      if (movido) requestAnimationFrame(() => pista.classList.remove('arrastrando'));
+    });
+    pista.addEventListener('click', e => { if (movido) { e.preventDefault(); movido = false; } }, true);
+  };
+
+  /* ---------- Equipo: acreditaciones con física de péndulo ----------
+     Al deslizar el riel, cada pase se inclina contra el movimiento y
+     vuelve oscilando (muelle amortiguado). Al pasar el ratón, se le da
+     un toque. En reposo, un vaivén leve. */
+  const pistaPases = $('#pases');
+  carril(pistaPases, $$('.equipo__cab .ctrl__b'));
+  const riel = $('.riel');
+  if (pistaPases && riel && !quieto) {
+    const colgantes = $$('.pase__colgante', pistaPases);
+    const ang = colgantes.map(() => 0);
+    const vel = colgantes.map(() => 0);
+    let corriendo = false, t0 = 0, xAnt = pistaPases.scrollLeft, v = 0;
+    const paso = t => {
+      if (!corriendo) return;
+      const dt = Math.min(48, t - (t0 || t)) / 1000; t0 = t;
+      if (dt > 0) {
+        const dx = pistaPases.scrollLeft - xAnt; xAnt = pistaPases.scrollLeft;
+        v += (dx / dt - v) * .25;
+        const s = t / 1000;
+        colgantes.forEach((c, i) => {
+          const objetivo = limita(-v * .016, -18, 18) + Math.sin(s * 1.5 + i * .9) * 1.4;
+          const acc = -42 * (ang[i] - objetivo) - 5.5 * vel[i];
+          vel[i] += acc * dt;
+          ang[i] += vel[i] * dt;
+          c.style.transform = `rotate(${ang[i].toFixed(2)}deg)`;
+        });
+      }
+      requestAnimationFrame(paso);
+    };
+    alVer(riel, si => {
+      if (si && !corriendo) { corriendo = true; t0 = 0; xAnt = pistaPases.scrollLeft; requestAnimationFrame(paso); }
+      if (!si) corriendo = false;
+    });
+    if (raton) {
+      colgantes.forEach((c, i) => {
+        c.parentElement.addEventListener('pointerenter', () => { vel[i] += (i % 2 ? 1 : -1) * 70; });
+      });
+    }
+  }
+
+  /* ---------- Textos que llenan su ancho (nombre del pase, ciudad) ----------
+     y nombres de disco que no se parten: si una palabra no cabe en la
+     funda, el nombre se reduce lo justo */
+  const llenar = () => {
+    $$('.disco__nombre').forEach(el => {
+      el.style.fontSize = '';
+      if (el.scrollWidth > el.clientWidth + 1) {
+        const fs = parseFloat(getComputedStyle(el).fontSize);
+        el.style.fontSize = (fs * el.clientWidth / el.scrollWidth * .98).toFixed(1) + 'px';
       }
     });
-    // Si se arrastró, el soltar no debe abrir el enlace
-    pista.addEventListener('click', e => { if (movido) { e.preventDefault(); movido = false; } }, true);
+    $$('.pase__grande, .capitulo__ciudad').forEach(el => {
+      el.style.fontSize = '';
+      const padre = el.parentElement;
+      const cs = getComputedStyle(padre);
+      const disponible = padre.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      // offsetWidth (maquetación) y no getBoundingClientRect: los pases
+      // entran girados y la caja transformada mediría de más
+      const antes = el.style.display;
+      el.style.display = 'inline-block';
+      const ancho = el.offsetWidth;
+      el.style.display = antes;
+      const fs = parseFloat(getComputedStyle(el).fontSize);
+      if (ancho > 0 && disponible > 0) {
+        const esPase = el.classList.contains('pase__grande');
+        // la ciudad deja aire al lomo y a la sombra de su letra
+        el.style.fontSize = Math.min(esPase ? 92 : 150, fs * disponible / ancho * (esPase ? .97 : .9)).toFixed(1) + 'px';
+      }
+    });
+  };
+
+  /* ---------- La gira: un libro que se hojea ---------- */
+  const libro = $('#libro');
+  let medirLibro = () => {};
+  if (libro) {
+    const hojas = $$('.hoja', libro);
+    const n = hojas.length;
+    const prev = $('[data-pasa="-1"]');
+    const next = $('[data-pasa="1"]');
+    const num = $('#libro-n');
+    const doble = matchMedia('(min-width: 900px)');
+    let pag = 0;
+
+    // El libro mide lo que mide su página más larga
+    const medir = medirLibro = () => {
+      const eventos = $$('.evento', libro);
+      eventos.forEach(e => (e.style.height = 'auto'));
+      const alto = Math.max(0, ...eventos.map(e => e.offsetHeight));
+      eventos.forEach(e => (e.style.height = ''));
+      if (alto) libro.style.setProperty('--alto', Math.ceil(alto) + 'px');
+    };
+
+    const pintar = (animar = true) => {
+      hojas.forEach((h, i) => {
+        const pasada = i < pag;
+        const cambia = h.classList.contains('pasada') !== pasada;
+        h.classList.toggle('pasada', pasada);
+        if (cambia && animar && !quieto) {
+          // durante el giro, la hoja va por encima de todas
+          h.style.zIndex = 300;
+          h.classList.remove('girando'); void h.offsetWidth; h.classList.add('girando');
+          clearTimeout(h._t);
+          h._t = setTimeout(() => { h.classList.remove('girando'); h.style.zIndex = pasada ? 100 + i : 100 - i; }, 1000);
+        } else {
+          h.style.zIndex = pasada ? 100 + i : 100 - i;
+        }
+        h.inert = i !== pag;
+      });
+      if (num) num.textContent = pag + 1;
+      if (prev) prev.disabled = pag === 0;
+      if (next) next.disabled = pag === n - 1;
+    };
+    const ir = d => {
+      const nueva = limita(pag + d, 0, n - 1);
+      if (nueva === pag) return;
+      pag = nueva;
+      pintar();
+    };
+
+    [prev, next].forEach(b => b && b.addEventListener('click', () => ir(Number(b.dataset.pasa))));
+
+    // Pulsar la página: derecha avanza, izquierda retrocede
+    let arrastre = false;
+    libro.addEventListener('click', e => {
+      if (arrastre) { arrastre = false; return; }
+      if (e.target.closest('a, button')) return;
+      const r = libro.getBoundingClientRect();
+      ir(doble.matches && e.clientX < r.left + r.width / 2 ? -1 : 1);
+    });
+    // Deslizar con el dedo (o arrastrar)
+    let x0 = null;
+    libro.addEventListener('pointerdown', e => { x0 = e.clientX; });
+    libro.addEventListener('pointerup', e => {
+      if (x0 === null) return;
+      const dx = e.clientX - x0; x0 = null;
+      if (Math.abs(dx) > 45) { arrastre = true; ir(dx < 0 ? 1 : -1); }
+    });
+    // Teclado: flechas con el foco dentro
+    libro.closest('section').addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') { ir(1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { ir(-1); e.preventDefault(); }
+    });
+
+    medir();
+    pintar(false);
+    doble.addEventListener('change', () => { medir(); pintar(false); });
+    addEventListener('load', medir);
+  }
+
+  /* ---------- Dudas: la de debajo se hunde al taparla la siguiente ---------- */
+  const dudas = $$('.duda');
+  if (dudas.length > 1 && !quieto) {
+    let pend = false;
+    const apilar = () => {
+      pend = false;
+      dudas.forEach((d, i) => {
+        const sig = dudas[i + 1];
+        if (!sig) return;
+        const r = d.getBoundingClientRect(), rs = sig.getBoundingClientRect();
+        const tapado = limita((r.bottom - rs.top) / r.height, 0, 1);
+        d.style.transform = tapado ? `scale(${(1 - tapado * .06).toFixed(4)})` : '';
+        d.style.setProperty('--tapa', (tapado * .6).toFixed(3));
+      });
+    };
+    addEventListener('scroll', () => { if (!pend) { pend = true; requestAnimationFrame(apilar); } }, { passive: true });
   }
 
   /* ---------- Menú de móvil ---------- */
   const btnMenu = $('#cab-menu');
   const nav = $('#nav');
-
   if (btnMenu && nav) {
     const cerrar = (instante = false) => {
       if (instante) nav.classList.add('al-instante');
@@ -234,35 +567,23 @@
       btnMenu.setAttribute('aria-expanded', 'false');
       if (instante) requestAnimationFrame(() => nav.classList.remove('al-instante'));
     };
-
     btnMenu.addEventListener('click', () => {
       const abierto = nav.classList.toggle('abierto');
       btnMenu.setAttribute('aria-expanded', String(abierto));
     });
-
     nav.addEventListener('click', e => { if (e.target.closest('a')) cerrar(); });
-
-    // Con teclado no se anima: Escape cierra al instante
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && nav.classList.contains('abierto')) {
-        cerrar(true);
-        btnMenu.focus();
-      }
+      if (e.key === 'Escape' && nav.classList.contains('abierto')) { cerrar(true); btnMenu.focus(); }
     });
-
     document.addEventListener('click', e => {
       if (nav.classList.contains('abierto') && !e.target.closest('#nav, #cab-menu')) cerrar();
     });
-
-    matchMedia('(min-width: 1024px)').addEventListener('change', e => {
-      if (e.matches) cerrar(true);
-    });
+    matchMedia('(min-width: 1024px)').addEventListener('change', e => { if (e.matches) cerrar(true); });
   }
 
   /* ---------- Cabecera compacta, progreso y barra fija ---------- */
   const cab = $('#cab');
   const fija = $('#fija');
-  const hero = $('.hero');
   const progreso = $('#progreso');
   const progresoNativo = CSS.supports && CSS.supports('animation-timeline: scroll()');
 
@@ -279,22 +600,21 @@
       const visible = y > limite;
       fija.classList.toggle('visible', visible);
       fija.setAttribute('aria-hidden', String(!visible));
-      fija.inert = !visible;               // escondida = no enfocable
+      fija.inert = !visible;
     }
     tick = false;
   };
-
   addEventListener('scroll', () => {
     if (tick) return;
     tick = true;
     requestAnimationFrame(alScroll);
   }, { passive: true });
 
+  // Al cargar las fuentes cambian las medidas: se recalcula todo lo que mide
+  const remedir = () => { ajustarHero(); llenar(); numerarOla(); medirLibro(); alScroll(); };
   let rz;
-  addEventListener('resize', () => {
-    clearTimeout(rz);
-    rz = setTimeout(() => { numerarOla(); alScroll(); }, 150);
-  });
-
+  addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(remedir, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(remedir);
+  llenar();
   alScroll();
 })();
