@@ -168,18 +168,6 @@
   }
 }
 
-/* Foco de sala: un cono de luz que sigue al cursor sobre la foto */
-.hero__foco{
-  position:absolute;left:0;top:0;z-index:0;
-  width:min(64vw,860px);aspect-ratio:1;
-  margin:calc(min(64vw,860px) / -2) 0 0 calc(min(64vw,860px) / -2);
-  border-radius:50%;
-  background:radial-gradient(closest-side, rgba(100,254,218,.2), rgba(48,79,255,.14) 46%, transparent 72%);
-  mix-blend-mode:screen;
-  pointer-events:none;
-  opacity:0;transition:opacity 700ms var(--ease);
-}
-.hero.con-foco .hero__foco{opacity:1}
 
 .hero__env{
   position:relative;z-index:1;
@@ -1552,7 +1540,6 @@ html:not(.js) .libro__ctrl{display:none}
   .vivo .glifo--eq span,.vivo .pulso__pista,.vivo .glifo--memo span,
   .disco__galleta,.bonos__lista.vivo .bono--top::before,.sello.vivo .sello__giro{animation:none}
   .glifo--memo span:nth-child(4n+1){opacity:1;transform:none}
-  .hero__foco{display:none}
 }
 .captura .hero__compas li::after,.captura .rotulo .rotulo__l,.captura .espejo,
 .captura .espejo__led,.captura .hero__panel > *,
@@ -1560,4 +1547,3 @@ html:not(.js) .libro__ctrl{display:none}
 .captura .vivo .glifo--eq span,.captura .vivo .pulso__pista,.captura .vivo .glifo--memo span,
 .captura .disco__galleta,.captura .bonos__lista.vivo .bono--top::before,.captura .sello.vivo .sello__giro{animation:none}
 .captura .glifo--memo span:nth-child(4n+1){opacity:1;transform:none}
-.captura .hero__foco{display:none}
