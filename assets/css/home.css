@@ -431,21 +431,26 @@
 .cinta.fuera .cinta__carril{animation-play-state:paused}
 @keyframes desfila{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
+/* Pausa: visible en todos los anchos (también en móvil y con zoom alto:
+   es la única forma de parar la cinta). Solo aparece si la cinta se mueve. */
 .cinta__btn{
   position:absolute;right:8px;top:50%;
   display:flex;align-items:center;justify-content:center;
   width:34px;height:34px;padding:0;margin-top:-17px;
   background:rgba(11,11,15,.85);color:var(--turquesa);
   border:1px solid var(--linea-viva);border-radius:50%;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
   transition:transform var(--t-press) var(--ease);
 }
+/* zona táctil de 44 px sin agrandar el círculo */
+.cinta__btn::after{content:"";position:absolute;inset:-5px;border-radius:50%}
+.cinta:not(.en-marcha) .cinta__btn{display:none}
 .cinta__btn:hover{border-color:var(--turquesa)}
 .cinta__btn:active{transform:scale(.9)}
 .cinta__btn .ico{width:14px;height:14px;stroke:currentColor}
 .cinta__btn .ico--play{display:none;fill:currentColor;stroke:none}
 .cinta__btn[aria-pressed="true"] .ico--pausa{display:none}
 .cinta__btn[aria-pressed="true"] .ico--play{display:block}
-@media (max-width:639px){.cinta__btn{display:none}}
 @media (prefers-reduced-motion:reduce){
   .cinta__btn{display:none}
   .cinta.en-marcha .cinta__carril{animation:none}
