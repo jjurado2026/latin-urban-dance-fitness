@@ -229,33 +229,48 @@
   let medirCinta = () => {};
   if (cinta && !quieto) {
     const carriles = [
-      { el: $('.cinta__carril--a'), lista: $('#cinta-a'), vel: 42 },   // px/s
-      { el: $('.cinta__carril--b'), lista: $('#cinta-b'), vel: 30 }
+      { el: $('.cinta__carril--a'), lista: $('#cinta-a'), vel: 42, inversa: false },  // px/s
+      { el: $('.cinta__carril--b'), lista: $('#cinta-b'), vel: 30, inversa: true }
     ].filter(c => c.el && c.lista);
-    // la copia, oculta a lectores de pantalla: las disciplinas se leen una vez
-    carriles.forEach(({ lista }) => {
-      const copia = lista.cloneNode(true);
-      copia.removeAttribute('id');
-      copia.setAttribute('aria-hidden', 'true');
-      lista.parentElement.appendChild(copia);
-    });
 
-    // duración = una lista / velocidad. Si cambia (al girar el móvil, por
-    // ejemplo), se conserva el punto del bucle para que no dé un salto.
+    // Cada vuelta recorre la mitad de las listas del carril (-50 %), y esa
+    // mitad tiene que cubrir la pantalla entera: si no, en un monitor ancho
+    // asomaría un hueco por la derecha. Las copias se añaden por parejas,
+    // ocultas a lectores de pantalla (la lista se lee una sola vez).
+    const copiar = (c, ancho) => {
+      const mitad = Math.max(1, Math.ceil(document.documentElement.clientWidth / ancho));
+      while (c.el.children.length < 2 * mitad) {
+        const copia = c.lista.cloneNode(true);
+        copia.removeAttribute('id');
+        copia.setAttribute('aria-hidden', 'true');
+        c.el.appendChild(copia);
+      }
+    };
+
+    // duración = listas por vuelta × ancho / velocidad. Si cambia (al girar
+    // el móvil, por ejemplo), se conserva el punto del bucle: no da saltos.
     medirCinta = () => {
       carriles.forEach(c => {
-        const seg = c.lista.offsetWidth / c.vel;
-        if (!(seg > 0)) return;
+        const ancho = c.lista.offsetWidth;
+        if (!(ancho > 0)) return;
+        const nAntes = c.el.children.length / 2;
+        copiar(c, ancho);
+        const n = c.el.children.length / 2;
+        const seg = n * ancho / c.vel;
         const anim = c.el.getAnimations ? c.el.getAnimations()[0] : null;
         const antes = anim ? anim.effect.getComputedTiming().duration : 0;   // ms
-        // mismo ancho (p. ej. la barra del móvil que aparece al hacer
-        // scroll dispara un resize): no se toca nada
-        if (antes > 0 && Math.abs(antes - seg * 1000) < 50) return;
-        const punto = antes > 0 ? (anim.currentTime % antes) / antes : 0;
+        // mismo ancho (la barra del móvil, que dispara un resize al hacer
+        // scroll): no se toca nada
+        if (antes > 0 && n === nAntes && Math.abs(antes - seg * 1000) < 50) return;
+        // punto del recorrido 0 → -50 % (el carril B va al revés)
+        let q = antes > 0 ? (anim.currentTime % antes) / antes : 0;
+        if (c.inversa) q = 1 - q;
+        // con más listas por vuelta, misma posición dentro de una lista
+        if (n !== nAntes) q = ((q * nAntes) % 1) / n;
         c.el.style.setProperty('--dur', seg.toFixed(2) + 's');
         if (antes > 0) {
           getComputedStyle(c.el).animationDuration;         // aplica la duración nueva
-          anim.currentTime = punto * seg * 1000;
+          anim.currentTime = (c.inversa ? 1 - q : q) * seg * 1000;
         }
       });
     };
@@ -270,26 +285,22 @@
         { rootMargin: '200px 0px' }).observe(cinta);
     }
 
+    // Botón de alternancia: la etiqueta («Pausar…») no cambia; el estado
+    // lo dice aria-pressed, y el icono pausa/play cambia por CSS
     if (btnCinta) {
       btnCinta.addEventListener('click', () => {
-        const pausada = cinta.classList.toggle('pausada');
-        btnCinta.setAttribute('aria-pressed', String(pausada));
-        $('.vo', btnCinta).textContent = pausada
-          ? 'Reanudar el movimiento de las disciplinas'
-          : 'Pausar el movimiento de las disciplinas';
+        btnCinta.setAttribute('aria-pressed', String(cinta.classList.toggle('pausada')));
       });
     }
   }
 
   /* ---------- Discos: la funda se da la vuelta ---------- */
+  // Igual que la pausa: etiqueta fija («Leer de qué va…»), estado en aria-pressed
   $$('.disco').forEach(disco => {
     const btn = $('.disco__girar', disco);
-    const nombre = $('.disco__nombre', disco)?.textContent.trim() || '';
     if (!btn) return;
     btn.addEventListener('click', () => {
-      const girado = disco.classList.toggle('girado');
-      btn.setAttribute('aria-pressed', String(girado));
-      $('.vo', btn).textContent = girado ? `Volver a la portada de ${nombre}` : `Leer de qué va ${nombre}`;
+      btn.setAttribute('aria-pressed', String(disco.classList.toggle('girado')));
     });
   });
 
