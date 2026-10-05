@@ -2,7 +2,18 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<script>document.documentElement.classList.add('js')</script>
+<script>
+  /* La propuesta caduca a los 10 días de su envío (5-10-2026): desde el
+     15-10-2026 a las 00:00 (hora de Madrid) se muestra caducada.html.
+     No aplica al abrir el archivo en local (capturas) ni con ?ver en el
+     enlace. Para alargarla, cambiar la fecha. */
+  if (location.protocol !== 'file:' && !/[?&]ver\b/.test(location.search) &&
+      Date.now() >= Date.parse('2026-10-15T00:00:00+02:00')) {
+    document.documentElement.style.display = 'none';
+    location.replace('caducada.html');
+  }
+  document.documentElement.classList.add('js');
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clases de baile y fitness en Ciudad Lineal | Studio LUDF Madrid</title>
 <meta name="description" content="Studio de baile latino y urbano en Ciudad Lineal, Madrid. Bachata, salsa, reggaetón, zumba, heels y más. Primera clase gratis, sin pareja y sin saber bailar. Metro Ciudad Lineal.">
